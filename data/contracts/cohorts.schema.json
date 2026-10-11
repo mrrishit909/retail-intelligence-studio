@@ -2,6 +2,27 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "additionalProperties": true,
  "properties": {
+  "active_customers": {
+   "items": {
+    "type": "integer"
+   },
+   "type": "array"
+  },
+  "active_definition": {
+   "type": "string"
+  },
+  "active_net_revenue_gbp": {
+   "items": {
+    "type": "number"
+   },
+   "type": "array"
+  },
+  "active_revenue_gbp": {
+   "items": {
+    "type": "number"
+   },
+   "type": "array"
+  },
   "cohort_months": {
    "items": {
     "pattern": "^[0-9]{4}-[0-9]{2}$",
@@ -131,6 +152,10 @@
   "revenue_retention",
   "orders_per_active",
   "mean_curve",
+  "active_customers",
+  "active_revenue_gbp",
+  "active_net_revenue_gbp",
+  "active_definition",
   "notes",
   "right_censoring"
  ],

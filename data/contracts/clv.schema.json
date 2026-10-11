@@ -188,6 +188,15 @@
      "actual": {
       "type": "number"
      },
+     "actual_sum": {
+      "type": "number"
+     },
+     "baseline_predicted": {
+      "type": "number"
+     },
+     "baseline_predicted_sum": {
+      "type": "number"
+     },
      "customers": {
       "type": "integer"
      },
@@ -197,7 +206,13 @@
      "error_pct": {
       "type": "number"
      },
+     "overlap_sum": {
+      "type": "number"
+     },
      "predicted": {
+      "type": "number"
+     },
+     "predicted_sum": {
       "type": "number"
      }
     },
@@ -206,7 +221,12 @@
      "customers",
      "predicted",
      "actual",
-     "error_pct"
+     "error_pct",
+     "baseline_predicted",
+     "overlap_sum",
+     "predicted_sum",
+     "actual_sum",
+     "baseline_predicted_sum"
     ],
     "type": "object"
    },
@@ -302,6 +322,12 @@
     "baseline_mae_customer": {
      "type": "number"
     },
+    "baseline_overlap_customer_sum": {
+     "type": "number"
+    },
+    "baseline_predicted_total": {
+     "type": "number"
+    },
     "corr_customer": {
      "type": "number"
     },
@@ -309,6 +335,9 @@
      "type": "number"
     },
     "mape_decile_pct": {
+     "type": "number"
+    },
+    "overlap_customer_sum": {
      "type": "number"
     },
     "predicted_repeats_total": {
@@ -330,7 +359,10 @@
     "corr_customer",
     "rank_corr_customer",
     "baseline",
-    "mape_decile_pct"
+    "mape_decile_pct",
+    "overlap_customer_sum",
+    "baseline_predicted_total",
+    "baseline_overlap_customer_sum"
    ],
    "type": "object"
   },

@@ -18,6 +18,9 @@
      "count": {
       "type": "integer"
      },
+     "hero": {
+      "type": "boolean"
+     },
      "lift": {
       "type": "number"
      },
@@ -34,12 +37,114 @@
      "support",
      "lift",
      "count",
-     "same_family"
+     "same_family",
+     "hero"
     ],
     "type": "object"
    },
    "minItems": 20,
    "type": "array"
+  },
+  "hero": {
+   "additionalProperties": true,
+   "properties": {
+    "a": {
+     "type": "string"
+    },
+    "a_desc": {
+     "type": "string"
+    },
+    "b": {
+     "type": "string"
+    },
+    "b_desc": {
+     "type": "string"
+    },
+    "baskets": {
+     "type": "integer"
+    },
+    "chance": {
+     "type": "number"
+    },
+    "confidence_a_to_b": {
+     "type": "number"
+    },
+    "confidence_b_to_a": {
+     "type": "number"
+    },
+    "lift": {
+     "type": "number"
+    },
+    "na": {
+     "type": "integer"
+    },
+    "nab": {
+     "type": "integer"
+    },
+    "nb": {
+     "type": "integer"
+    },
+    "runner_up": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "a": {
+        "type": "string"
+       },
+       "b": {
+        "type": "string"
+       },
+       "lift": {
+        "type": "number"
+       },
+       "nab": {
+        "type": "integer"
+       }
+      },
+      "required": [
+       "a",
+       "b",
+       "nab",
+       "lift"
+      ],
+      "type": "object"
+     },
+     "minItems": 1,
+     "type": "array"
+    },
+    "same_family": {
+     "type": "boolean"
+    },
+    "selection_rule": {
+     "type": "string"
+    },
+    "support": {
+     "type": "number"
+    },
+    "variant_of_same_product": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "a",
+    "b",
+    "a_desc",
+    "b_desc",
+    "na",
+    "nb",
+    "nab",
+    "baskets",
+    "chance",
+    "lift",
+    "support",
+    "confidence_a_to_b",
+    "confidence_b_to_a",
+    "same_family",
+    "variant_of_same_product",
+    "selection_rule",
+    "runner_up"
+   ],
+   "type": "object"
   },
   "nodes": {
    "items": {
@@ -184,6 +289,9 @@
      },
      "support": {
       "type": "number"
+     },
+     "variant_of_same_product": {
+      "type": "boolean"
      }
     },
     "required": [
@@ -198,7 +306,8 @@
      "conviction",
      "count",
      "same_family",
-     "families"
+     "families",
+     "variant_of_same_product"
     ],
     "type": "object"
    },
@@ -210,6 +319,51 @@
   },
   "schema_version": {
    "const": "v1"
+  },
+  "showcase": {
+   "additionalProperties": true,
+   "properties": {
+    "indices": {
+     "items": {
+      "type": "integer"
+     },
+     "maxItems": 6,
+     "minItems": 6,
+     "type": "array"
+    },
+    "itemsets": {
+     "items": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "maxItems": 6,
+     "minItems": 6,
+     "type": "array"
+    },
+    "kinds": {
+     "items": {
+      "enum": [
+       "lift",
+       "count"
+      ]
+     },
+     "maxItems": 6,
+     "minItems": 6,
+     "type": "array"
+    },
+    "rule": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "rule",
+    "indices",
+    "kinds",
+    "itemsets"
+   ],
+   "type": "object"
   },
   "tags": {
    "additionalProperties": {
@@ -226,6 +380,8 @@
   "params",
   "rules_total",
   "rules",
+  "showcase",
+  "hero",
   "nodes",
   "edges",
   "caveat"

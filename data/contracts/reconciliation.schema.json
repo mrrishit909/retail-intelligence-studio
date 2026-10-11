@@ -218,20 +218,50 @@
     "matched_qty": {
      "type": "integer"
     },
+    "matched_value_gbp": {
+     "type": "number"
+    },
     "matching_rule": {
      "type": "string"
     },
     "over_refund_lines": {
      "type": "integer"
     },
+    "over_refund_qty": {
+     "type": "integer"
+    },
+    "over_refund_value_gbp": {
+     "type": "number"
+    },
+    "refunded_qty": {
+     "type": "integer"
+    },
+    "sale_units": {
+     "type": "integer"
+    },
     "unmatched_no_customer_lines": {
      "type": "integer"
+    },
+    "unmatched_no_customer_qty": {
+     "type": "integer"
+    },
+    "unmatched_no_customer_value_gbp": {
+     "type": "number"
     },
     "unmatched_no_prior_sale_lines": {
      "type": "integer"
     },
+    "unmatched_no_prior_sale_qty": {
+     "type": "integer"
+    },
+    "unmatched_no_prior_sale_value_gbp": {
+     "type": "number"
+    },
     "unmatched_qty": {
      "type": "integer"
+    },
+    "value_basis": {
+     "type": "string"
     },
     "value_gbp": {
      "type": "number"
@@ -247,7 +277,17 @@
     "unmatched_no_customer_lines",
     "unmatched_no_prior_sale_lines",
     "matching_rule",
-    "over_refund_lines"
+    "over_refund_lines",
+    "sale_units",
+    "refunded_qty",
+    "matched_value_gbp",
+    "unmatched_no_prior_sale_qty",
+    "unmatched_no_prior_sale_value_gbp",
+    "unmatched_no_customer_qty",
+    "unmatched_no_customer_value_gbp",
+    "over_refund_qty",
+    "over_refund_value_gbp",
+    "value_basis"
    ],
    "type": "object"
   },

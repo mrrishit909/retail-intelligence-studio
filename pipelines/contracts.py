@@ -65,9 +65,14 @@ FACT_NUM = [
     "nv_cost_ratio", "nv_salvage_ratio", "nv_critical_fractile", "nv_items", "nv_vectors", "nv_policy_profit_uplift_pct",
     # elasticity
     "elasticity_skus_considered", "elasticity_skus_qualifying", "elasticity_estimable",
+    # DR-1 hero pair, DR-10 copy facts
+    "hero_pair_na", "hero_pair_nb", "hero_pair_nab", "hero_pair_chance", "hero_pair_lift", "rfm_rf_share_customers", "rfm_rf_share_revenue",
 ]
-FACT_STR = ["title", "attribution", "licence", "window_label", "elasticity_decision", "not_advice", "synthetic_note", "forecast_best_model", "currency"]
+FACT_STR = ["title", "attribution", "licence", "window_label", "elasticity_decision", "not_advice", "synthetic_note", "forecast_best_model", "currency",
+            "hero_pair_a", "hero_pair_b", "hero_pair_a_desc", "hero_pair_b_desc", "hero_selection_rule", "backtest_best_model_label"]
 
+ELAST_EST = obj({"method": S, "skus": arr(obj({"sku": S, "description": S, "elasticity": N, "ci_lo": N, "ci_hi": N, "weeks": I, "regimes": I})),
+                  "pooled": obj({"elasticity": N, "ci_lo": N, "ci_hi": N})})
 TEXT_SOURCE = obj({"id": S, "publisher": S, "dataset": S, "url": S, "doi": S, "licence": S, "licence_url": S, "attribution": S, "role": S})
 
 SCHEMAS = {
@@ -88,7 +93,9 @@ SCHEMAS = {
         "analytics_scopes": arr(obj({"analysis": S, "rule": S, "rows_in": I, "rows_out": I, "rows_dropped_by_reason": OBJ}), lo=5),
         "guest": obj({"rows": I, "row_share": N, "amount_gbp": N, "amount_share": N, "note": S}),
         "refunds": obj({"lines": I, "invoices": I, "value_gbp": N, "matched_lines": I, "matched_qty": I, "unmatched_qty": I, "unmatched_no_customer_lines": I,
-                        "unmatched_no_prior_sale_lines": I, "matching_rule": S, "over_refund_lines": I}),
+                        "unmatched_no_prior_sale_lines": I, "matching_rule": S, "over_refund_lines": I,
+                        "sale_units": I, "refunded_qty": I, "matched_value_gbp": N, "unmatched_no_prior_sale_qty": I, "unmatched_no_prior_sale_value_gbp": N,
+                        "unmatched_no_customer_qty": I, "unmatched_no_customer_value_gbp": N, "over_refund_qty": I, "over_refund_value_gbp": N, "value_basis": S}),
         "stockcode_classes": arr(obj({"class": S, "codes": arr(S), "rows": I, "amount_gbp": N}), lo=3),
         "identities": arr(obj({"id": S, "description": S, "lhs": N, "rhs": N, "abs_diff": N, "pass": B}), lo=6),
         "monthly": arr(obj({"month": MONTH, "amount_gbp": N}), lo=24)}),
@@ -113,7 +120,8 @@ SCHEMAS = {
         "included": obj({"customers": I, "excluded_guest_line_share": N, "excluded_guest_revenue_share": N, "customers_with_only_refunds": I}),
         "segments": arr(obj({"segment": S, "rule": S, "customers": I, "customer_share": N, "revenue_gbp": N, "revenue_share": N, "avg_recency_days": N,
                              "avg_frequency": N, "avg_monetary_gbp": N, "action_note": S}), lo=6),
-        "grid": obj({"r_by_f_customers": arr(arr(I), 5), "r_by_f_revenue_gbp": arr(arr(N), 5)}),
+        "grid": obj({"r_by_f_customers": arr(arr(I), 5), "r_by_f_revenue_gbp": arr(arr(N), 5), "r_by_m_customers": arr(arr(I), 5), "r_by_m_revenue_gbp": arr(arr(N), 5),
+                     "f_by_m_customers": arr(arr(I), 5), "f_by_m_revenue_gbp": arr(arr(N), 5), "axes": S}),
         "customers": obj({"key": arr(I), "recency_days": arr(I), "frequency": arr(I), "monetary_gbp": arr(N), "r": arr(I), "f": arr(I), "m": arr(I), "segment": arr(I), "country": arr(I)}),
         "segment_names": arr(S), "country_names": arr(S)}),
     "cohorts": top("cohorts", {
@@ -121,15 +129,19 @@ SCHEMAS = {
         "offsets": arr(I, lo=12),
         "retention": arr(arr(NN)), "revenue_retention": arr(arr(NN)), "orders_per_active": arr(arr(NN)),
         "mean_curve": obj({"offsets": arr(I), "retention": arr(NN), "n_cohorts": arr(I)}),
+        "active_customers": arr(I), "active_revenue_gbp": arr(N), "active_net_revenue_gbp": arr(N), "active_definition": S,
         "notes": arr(S, lo=1), "right_censoring": S}),
     "baskets": top("baskets", {
         "params": obj({"min_support": N, "min_confidence": N, "min_lift": N, "max_len": I, "baskets": I, "frequent_items": I, "frequent_itemsets": I,
                        "basket_definition": S, "item_definition": S, "support_count_min": I}),
         "rules_total": I,
         "rules": arr(obj({"antecedent": arr(S, lo=1), "consequent": arr(S, lo=1), "antecedent_desc": arr(S), "consequent_desc": arr(S), "support": N, "confidence": N, "lift": N,
-                          "leverage": N, "conviction": NN, "count": I, "same_family": B, "families": arr(S)}), lo=20),
+                          "leverage": N, "conviction": NN, "count": I, "same_family": B, "families": arr(S), "variant_of_same_product": B}), lo=20),
+        "showcase": obj({"rule": S, "indices": arr(I, 6), "kinds": arr({"enum": ["lift", "count"]}, 6), "itemsets": arr(arr(S), 6)}),
+        "hero": obj({"a": S, "b": S, "a_desc": S, "b_desc": S, "na": I, "nb": I, "nab": I, "baskets": I, "chance": N, "lift": N, "support": N, "confidence_a_to_b": N, "confidence_b_to_a": N,
+                     "same_family": B, "variant_of_same_product": B, "selection_rule": S, "runner_up": arr(obj({"a": S, "b": S, "nab": I, "lift": N}), lo=1)}),
         "nodes": arr(obj({"sku": S, "description": S, "family": S, "support": N, "baskets": I, "degree": I}), lo=20),
-        "edges": arr(obj({"a": S, "b": S, "support": N, "lift": N, "count": I, "same_family": B}), lo=20),
+        "edges": arr(obj({"a": S, "b": S, "support": N, "lift": N, "count": I, "same_family": B, "hero": B}), lo=20),
         "caveat": S}),
     "clv": top("clv", {
         "model": obj({"bgnbd": obj({"r": N, "alpha": N, "a": N, "b": N, "loglik": N, "converged": B, "n_customers": I}),
@@ -138,8 +150,9 @@ SCHEMAS = {
         "calibration": obj({"start": DATE, "end": DATE, "holdout_start": DATE, "holdout_end": DATE, "holdout_weeks": N, "customers": I,
                             "customers_repeat_in_calibration": I, "customers_active_in_holdout": I}),
         "holdout": obj({"predicted_repeats_total": N, "actual_repeats_total": I, "total_error_pct": N, "mae_customer": N, "baseline_mae_customer": N,
-                        "corr_customer": N, "rank_corr_customer": N, "baseline": S, "mape_decile_pct": N}),
-        "deciles": arr(obj({"decile": I, "customers": I, "predicted": N, "actual": N, "error_pct": N}), 10),
+                        "corr_customer": N, "rank_corr_customer": N, "baseline": S, "mape_decile_pct": N,
+                        "overlap_customer_sum": N, "baseline_predicted_total": N, "baseline_overlap_customer_sum": N}),
+        "deciles": arr(obj({"decile": I, "customers": I, "predicted": N, "actual": N, "error_pct": N, "baseline_predicted": N, "overlap_sum": N, "predicted_sum": N, "actual_sum": N, "baseline_predicted_sum": N}), 10),
         "by_frequency": arr(obj({"repeats_in_calibration": I, "customers": I, "predicted": N, "actual": N}), lo=4),
         "gamma_gamma_check": obj({"corr_frequency_monetary": N, "customers": I, "note": S}),
         "final_fit": obj({"fit_start": DATE, "fit_end": DATE, "horizon_weeks": I, "discount_rate_annual": N, "customers": I, "clv_total_gbp": N, "clv_median_gbp": N,
@@ -155,9 +168,10 @@ SCHEMAS = {
                            "total_units": I, "skill_vs_snaive_pct": NN, "wape_pct": NN, "snaive_wape_pct": NN}), lo=20)}),
     "backtest": top("backtest", {
         "design": obj({"scheme": S, "first_origin_week": DATE, "last_origin_week": DATE, "origins": I, "horizons": arr(I, lo=1), "min_train_weeks": I, "series": I,
-                       "baseline": S, "metrics": arr(S)}),
-        "models": arr(obj({"id": S, "description": S}), lo=3),
-        "pooled": arr(obj({"model": S, "horizon": I, "scope": {"enum": ["all", "family", "sku"]}, "mae": N, "wape_pct": N, "mase": NN, "bias_pct": N, "skill_vs_snaive_pct": NN, "n": I}), lo=10),
+                       "baseline": S, "metrics": arr(S), "error_sign": S, "total_identities": S}),
+        "models": arr(obj({"id": S, "label": S, "description": S}), lo=3),
+        "pooled": arr(obj({"model": S, "horizon": I, "scope": {"enum": ["all", "family", "sku"]}, "mae": N, "wape_pct": N, "mase": NN, "bias_pct": N, "skill_vs_snaive_pct": NN, "n": I,
+                         "actual_total": N, "forecast_total": N, "over_total": N, "under_total": N}), lo=10),
         "win_rate": arr(obj({"model": S, "scope": S, "series_beating_snaive": I, "series": I, "share": N}), lo=2),
         "by_series": arr(obj({"id": S, "kind": S, "models": OBJ}), lo=20),
         "by_origin": arr(obj({"origin": DATE, "mae": OBJ}), lo=10),
@@ -172,13 +186,15 @@ SCHEMAS = {
         "disclaimer": S}),
     "newsvendor_vectors": top("newsvendor_vectors", {
         "tolerance_rel": N, "note": S,
-        "vectors": arr(obj({"case": S, "model": {"enum": ["normal", "empirical"]},
+        "vectors": arr(obj({"case": S, "item": S, "model": {"enum": ["normal", "empirical"]},
                             "inputs": obj({"price": N, "cost": N, "salvage": N, "mu": NN, "sigma": NN, "samples": {"type": ["array", "null"], "items": N}}, ["price", "cost", "salvage"]),
                             "expected": obj({"critical_fractile": N, "q_star": N, "expected_profit": N, "expected_sales": N, "expected_leftover": N, "expected_shortage": N, "service_level": N})}), lo=20)}),
     "newsvendor_scenarios": top("newsvendor_scenarios", {
         "grid": obj({"cost_ratio": arr(N, lo=3), "salvage_ratio": arr(N, lo=2)}),
         "scenarios": arr(obj({"item": S, "cost_ratio": N, "salvage_ratio": N, "critical_fractile": N, "q_normal": N, "q_empirical": N, "profit_normal": N, "profit_empirical": N,
-                              "service_level": N, "mean_order_profit": N}), lo=50),
+                              "service_level": N, "mean_order_profit": N,
+                              "expected_sales_normal": N, "expected_leftover_normal": N, "expected_shortage_normal": N,
+                              "expected_sales_empirical": N, "expected_leftover_empirical": N, "expected_shortage_empirical": N}), lo=50),
         "policy_check": obj({"description": S, "items": I, "weeks_evaluated": I, "profit_newsvendor": N, "profit_mean_order": N, "uplift_pct": N,
                              "per_item": arr(obj({"item": S, "profit_newsvendor": N, "profit_mean_order": N, "profit_snaive_order": N})), "caveat": S})}),
     "elasticity": top("elasticity", {
@@ -189,11 +205,18 @@ SCHEMAS = {
                               "weeks_off_modal": I, "price_regimes": I, "units": I}), lo=20),
             "distribution": obj({"distinct_prices_quantiles": arr(N), "price_cv_quantiles": arr(N), "quantile_levels": arr(N)}),
             "price_tiers_note": S}),
-        "estimates": {"type": ["object", "null"]}, "what_would_be_needed": arr(S, lo=2)}),
+        "estimates": {"oneOf": [{"type": "null"}, ELAST_EST]}, "what_would_be_needed": arr(S, lo=2)}),
     "validation": top("validation", {
         "checks": arr(obj({"id": S, "group": S, "description": S, "expected": S, "actual": S, "pass": B}), lo=20),
         "passed": I, "failed": I, "limitations_observed": arr(S, lo=3)}),
 }
+
+# DR-9: the not-estimable state never carries a number; the estimable state must carry estimates.
+_EST = lambda v: {"properties": {"decision": {"properties": {"estimable": {"const": v}}, "required": ["estimable"]}}, "required": ["decision"]}  # noqa: E731
+SCHEMAS["elasticity"]["allOf"] = [
+    {"if": _EST(False), "then": {"properties": {"estimates": {"type": "null"}}}},
+    {"if": _EST(True), "then": {"properties": {"estimates": ELAST_EST}}},
+]
 
 
 def run() -> None:

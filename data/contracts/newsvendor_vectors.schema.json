@@ -103,6 +103,9 @@
       ],
       "type": "object"
      },
+     "item": {
+      "type": "string"
+     },
      "model": {
       "enum": [
        "normal",
@@ -112,6 +115,7 @@
     },
     "required": [
      "case",
+     "item",
      "model",
      "inputs",
      "expected"

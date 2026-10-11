@@ -53,6 +53,9 @@
     "baseline": {
      "type": "string"
     },
+    "error_sign": {
+     "type": "string"
+    },
     "first_origin_week": {
      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
      "type": "string"
@@ -85,6 +88,9 @@
     },
     "series": {
      "type": "integer"
+    },
+    "total_identities": {
+     "type": "string"
     }
    },
    "required": [
@@ -96,7 +102,9 @@
     "min_train_weeks",
     "series",
     "baseline",
-    "metrics"
+    "metrics",
+    "error_sign",
+    "total_identities"
    ],
    "type": "object"
   },
@@ -129,10 +137,14 @@
      },
      "id": {
       "type": "string"
+     },
+     "label": {
+      "type": "string"
      }
     },
     "required": [
      "id",
+     "label",
      "description"
     ],
     "type": "object"
@@ -144,7 +156,13 @@
    "items": {
     "additionalProperties": true,
     "properties": {
+     "actual_total": {
+      "type": "number"
+     },
      "bias_pct": {
+      "type": "number"
+     },
+     "forecast_total": {
       "type": "number"
      },
      "horizon": {
@@ -165,6 +183,9 @@
      "n": {
       "type": "integer"
      },
+     "over_total": {
+      "type": "number"
+     },
      "scope": {
       "enum": [
        "all",
@@ -177,6 +198,9 @@
        "number",
        "null"
       ]
+     },
+     "under_total": {
+      "type": "number"
      },
      "wape_pct": {
       "type": "number"
@@ -191,7 +215,11 @@
      "mase",
      "bias_pct",
      "skill_vs_snaive_pct",
-     "n"
+     "n",
+     "actual_total",
+     "forecast_total",
+     "over_total",
+     "under_total"
     ],
     "type": "object"
    },

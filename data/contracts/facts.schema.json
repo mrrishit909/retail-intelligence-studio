@@ -29,6 +29,30 @@
      ],
      "type": "object"
     },
+    "backtest_best_model_label": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
     "basket_count": {
      "additionalProperties": true,
      "properties": {
@@ -1157,6 +1181,246 @@
      ],
      "type": "object"
     },
+    "hero_pair_a": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_a_desc": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_b": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_b_desc": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_chance": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_lift": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_na": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_nab": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_pair_nb": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "hero_selection_rule": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
     "invoices": {
      "additionalProperties": true,
      "properties": {
@@ -1757,6 +2021,54 @@
      ],
      "type": "object"
     },
+    "rfm_rf_share_customers": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
+    "rfm_rf_share_revenue": {
+     "additionalProperties": true,
+     "properties": {
+      "note": {
+       "type": "string"
+      },
+      "tag": {
+       "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+       "type": "string"
+      },
+      "unit": {
+       "type": "string"
+      },
+      "value": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "unit",
+      "tag"
+     ],
+     "type": "object"
+    },
     "rfm_top_decile_revenue_share": {
      "additionalProperties": true,
      "properties": {
@@ -2173,6 +2485,13 @@
     "elasticity_skus_considered",
     "elasticity_skus_qualifying",
     "elasticity_estimable",
+    "hero_pair_na",
+    "hero_pair_nb",
+    "hero_pair_nab",
+    "hero_pair_chance",
+    "hero_pair_lift",
+    "rfm_rf_share_customers",
+    "rfm_rf_share_revenue",
     "title",
     "attribution",
     "licence",
@@ -2181,7 +2500,13 @@
     "not_advice",
     "synthetic_note",
     "forecast_best_model",
-    "currency"
+    "currency",
+    "hero_pair_a",
+    "hero_pair_b",
+    "hero_pair_a_desc",
+    "hero_pair_b_desc",
+    "hero_selection_rule",
+    "backtest_best_model_label"
    ],
    "type": "object"
   },

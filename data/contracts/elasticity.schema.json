@@ -1,6 +1,130 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "additionalProperties": true,
+ "allOf": [
+  {
+   "if": {
+    "properties": {
+     "decision": {
+      "properties": {
+       "estimable": {
+        "const": false
+       }
+      },
+      "required": [
+       "estimable"
+      ]
+     }
+    },
+    "required": [
+     "decision"
+    ]
+   },
+   "then": {
+    "properties": {
+     "estimates": {
+      "type": "null"
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "decision": {
+      "properties": {
+       "estimable": {
+        "const": true
+       }
+      },
+      "required": [
+       "estimable"
+      ]
+     }
+    },
+    "required": [
+     "decision"
+    ]
+   },
+   "then": {
+    "properties": {
+     "estimates": {
+      "additionalProperties": true,
+      "properties": {
+       "method": {
+        "type": "string"
+       },
+       "pooled": {
+        "additionalProperties": true,
+        "properties": {
+         "ci_hi": {
+          "type": "number"
+         },
+         "ci_lo": {
+          "type": "number"
+         },
+         "elasticity": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "elasticity",
+         "ci_lo",
+         "ci_hi"
+        ],
+        "type": "object"
+       },
+       "skus": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "ci_hi": {
+           "type": "number"
+          },
+          "ci_lo": {
+           "type": "number"
+          },
+          "description": {
+           "type": "string"
+          },
+          "elasticity": {
+           "type": "number"
+          },
+          "regimes": {
+           "type": "integer"
+          },
+          "sku": {
+           "type": "string"
+          },
+          "weeks": {
+           "type": "integer"
+          }
+         },
+         "required": [
+          "sku",
+          "description",
+          "elasticity",
+          "ci_lo",
+          "ci_hi",
+          "weeks",
+          "regimes"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "method",
+       "skus",
+       "pooled"
+      ],
+      "type": "object"
+     }
+    }
+   }
+  }
+ ],
  "properties": {
   "decision": {
    "additionalProperties": true,
@@ -56,9 +180,83 @@
    "type": "object"
   },
   "estimates": {
-   "type": [
-    "object",
-    "null"
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "additionalProperties": true,
+     "properties": {
+      "method": {
+       "type": "string"
+      },
+      "pooled": {
+       "additionalProperties": true,
+       "properties": {
+        "ci_hi": {
+         "type": "number"
+        },
+        "ci_lo": {
+         "type": "number"
+        },
+        "elasticity": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "elasticity",
+        "ci_lo",
+        "ci_hi"
+       ],
+       "type": "object"
+      },
+      "skus": {
+       "items": {
+        "additionalProperties": true,
+        "properties": {
+         "ci_hi": {
+          "type": "number"
+         },
+         "ci_lo": {
+          "type": "number"
+         },
+         "description": {
+          "type": "string"
+         },
+         "elasticity": {
+          "type": "number"
+         },
+         "regimes": {
+          "type": "integer"
+         },
+         "sku": {
+          "type": "string"
+         },
+         "weeks": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "sku",
+         "description",
+         "elasticity",
+         "ci_lo",
+         "ci_hi",
+         "weeks",
+         "regimes"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "method",
+      "skus",
+      "pooled"
+     ],
+     "type": "object"
+    }
    ]
   },
   "evidence": {

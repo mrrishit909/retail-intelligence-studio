@@ -145,6 +145,31 @@
   "grid": {
    "additionalProperties": true,
    "properties": {
+    "axes": {
+     "type": "string"
+    },
+    "f_by_m_customers": {
+     "items": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "maxItems": 5,
+     "minItems": 5,
+     "type": "array"
+    },
+    "f_by_m_revenue_gbp": {
+     "items": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "maxItems": 5,
+     "minItems": 5,
+     "type": "array"
+    },
     "r_by_f_customers": {
      "items": {
       "items": {
@@ -166,11 +191,38 @@
      "maxItems": 5,
      "minItems": 5,
      "type": "array"
+    },
+    "r_by_m_customers": {
+     "items": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "maxItems": 5,
+     "minItems": 5,
+     "type": "array"
+    },
+    "r_by_m_revenue_gbp": {
+     "items": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "maxItems": 5,
+     "minItems": 5,
+     "type": "array"
     }
    },
    "required": [
     "r_by_f_customers",
-    "r_by_f_revenue_gbp"
+    "r_by_f_revenue_gbp",
+    "r_by_m_customers",
+    "r_by_m_revenue_gbp",
+    "f_by_m_customers",
+    "f_by_m_revenue_gbp",
+    "axes"
    ],
    "type": "object"
   },
