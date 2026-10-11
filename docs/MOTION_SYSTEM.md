@@ -196,7 +196,7 @@ Format for each entry: **Trigger**, **Initial → End**, **Duration / Easing**, 
 
 ### 5.5 Coming Back: the month scrub (S03b)
 
-- **Trigger:** scroll steps p 0.04-0.96 (25 steps), MONTH ◀ ▶, COHORT, UNIT.
+- **Trigger:** scroll steps p 0.04-0.96 (months 1-24; month 0 by ◀ only, VISUAL_DESIGN 3.4 S03b), MONTH ◀ ▶, COHORT, UNIT.
 - **Month step:** the partner (active set) re-sizes and the overlap re-solves (1200ms on scroll, 800ms on a control, `--ease-smooth`). The anchor (the cohort) holds. The month strip's active tick moves (200ms).
 - **Censored month:** the partner crossfades to hatch (600ms); the overlap fades out (600ms); the ledger reads `NOT YET OBSERVED`.
 - **Cohort change:** both discs re-size together (800ms); the month holds if published for the new cohort, else clamps to its last month with a 200ms label flash of `MONTH {{m}} IS NOT PUBLISHED FOR THIS COHORT`.
@@ -367,7 +367,7 @@ Each artifact is under 400 KB gzip by contract (`DATA_CONTRACTS.md`); the fronte
 | 2 | Area rule at every rest state listed in section 2 (debug hook) | Playwright |
 | 3 | S00: SKIP visible at 100ms; nav within 400ms of SKIP; LCP element `h1[data-hero]`; both cusps in frame at the end on D and M; anchor diameter ≥ 1.2 x height (D) | Playwright + Lighthouse |
 | 4 | No value in transit: 10 sampled frames of a rule step and a month step show only old or new ledger numbers | Playwright |
-| 5 | Never concentric: across a scripted pass of every scene, the debug hook's `d` is never below `|rA − rB| − 1e-9` and never 0 | Playwright |
+| 5 | Never concentric: across a scripted pass of every scene, the debug hook's `d` is never below `|rA − rB| − 1e-9` and never 0; S04 at R ≥ 1 and F ≥ 1 draws **one** disc with the `SAME` label (identical sets), never two concentric discs; S03b month 0 of the first cohort shows `ALMOST THE SAME SET`; S05 ORDER OVERRIDE at its minimum gives expected sales ≥ 0 | Playwright |
 | 6 | Sticky scenes release at the right point; reverse and rapid scroll; direct jumps land at p = 0 states; Back/Forward | Playwright |
 | 7 | Resize mid-scene (D → M → D at S03b month 12) redraws the same state with the new `k` | Playwright |
 | 8 | Reduced motion: no pinned stage; intro end state with the ghost; every control works | Playwright (emulated media) |

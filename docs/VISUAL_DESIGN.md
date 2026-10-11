@@ -87,7 +87,7 @@ The giant circular element is **Common Ground**: two sets drawn as two discs of 
 |---|---|
 | **Sets** | Every Common Ground view is one ordered pair (anchor, partner) of sets measured in one unit. The unit is printed in every view: `AREA = BASKETS`, `AREA = CUSTOMERS`, `AREA = UNITS`, `AREA = GBP`. Section 3.4 lists the pair for every scene |
 | **Area** | `area = size × k`, where `k` (px² per unit) is a constant per viewport and per scene, set at the scene's first state by the anchor's radius (3.3). Within a scene, a bigger set is a bigger disc: `r = sqrt(size × k / π)` |
-| **Overlap** | The centre distance `d` is solved so that the circle-circle intersection area equals `shared × k` exactly (bisection on the monotone lens-area function, 1e-9 relative; MathWorld, reference 14). Disjoint sets (`shared = 0`) sit apart with a gap of 0.06 r_partner. Full containment (`shared = size of the smaller`) is **internally tangent**, never concentric: `d = r_anchor − r_partner` |
+| **Overlap** | The centre distance `d` is solved so that the circle-circle intersection area equals `shared × k` exactly (bisection on the monotone lens-area function, 1e-9 relative; MathWorld, reference 14). Disjoint sets (`shared = 0`) sit apart with a gap of 0.06 r_partner. Full containment (`shared = size of the smaller`) is **internally tangent**, never concentric: `d = r_anchor − r_partner`. **Identical sets** (`size_a = size_b = shared`, for example S04 at R ≥ 1 and F ≥ 1) are never drawn as two discs: one disc in the overlap's white light, labelled `SAME {{N}} {{UNIT}}: BOTH CONDITIONS HOLD FOR EVERYONE`. **Near-identical sets** (the smaller set's lone crescent under 2% of its area) are drawn as they are, and the readout adds `ALMOST THE SAME SET`, so a thin crescent is explained, not mistaken for a rendering error |
 | **Chance** | Wherever the two sets come from one population (baskets, customers), the view can show where **chance alone** would place the partner: the overlap independence predicts (`size_a × size_b / population`). The chance position is drawn as a **ghost**: the partner's disc at that distance, 6% white, no edge. The real partner is pulled from the ghost to its real place (interaction 1). The distance between ghost and real is the visible form of lift |
 | **Axis** | The line through the two centres. One axis per viewport and scene (3.3): D horizontal, T and M diagonal (0.6, 0.8). Discs move only **along the axis** (pull, push) or change radius. Nothing moves around a circle |
 | **Light** | Each disc is a **volumetric fill lit from the side that faces its partner** and falling away from it. Stops along the axis, from the far rim to the near rim: 0 at 18%, 0.45 at 30%, 0.85 at 62%, rim at 72% of the role colour's four-stop ramp (colour semantics). The overlap is drawn on top of both in the `lighter` composite with its own **white-hot fill**: luminance is highest along the overlap's midline (the common chord's perpendicular bisector inside the overlap) and falls toward the two arcs, from `#FFFFFF` at 98% to `#FFE9E2` at 85% to `#FF9A8A` at 35% at the arcs. **The overlap's luminance comes from a distance-to-boundary field, never a point-centred radial gradient** (a point gradient read as a lit sphere in the greyscale check, section 2). A static bloom of the overlap only (1/4 resolution, blur 18px, screen at 35%) spills just past its arcs |
@@ -299,7 +299,7 @@ What differs is the metaphor, the giant circular composition, the scene composit
 
 ![P09 vs P02, P03 and P07, colour and greyscale](../design/sketches/p09-pair-check.png)
 
-With hue removed, P03 is a textured sphere with a grid, P07 a disc of vertical stripes with a black horizontal cut, P02 a small dot between walls, and P09 **a bright almond with two dim wings**. They separate on structure alone. One finding: in greyscale, the sketch's point-centred white gradient inside the overlap gives it a slight "lit sphere" read. The binding rule (section 0, Light) therefore lights the overlap from a **distance-to-boundary field along its midline**, which keeps it flat and almond-shaped. The QA open/close sheet repeats this check on real build frames (MOTION_SYSTEM test 15).
+With hue removed, P03 is a textured sphere with a grid, P07 a disc of vertical stripes with a black horizontal cut, P02 a small dot between walls, and P09 **a bright almond with two dim wings**. They separate on structure alone. **One finding changed the rendering.** The first sketches lit the overlap with a point-centred white radial gradient, and in greyscale that read slightly as a lit sphere (P03's territory). The binding rule (section 0, Light) now lights the overlap from its midline, falling off symmetrically to both arcs, and **every committed sketch and both sheets were re-rendered with it** (a linear field along the axis in the SVG sketch, peaked half-way between the overlap's two ends). Re-checked in greyscale: the overlap reads as a flat almond with hard arcs and a brighter vertical midline band, no shading toward a limb. The residual watch item is that band: it must stay a soft falloff inside the almond, never a hard vertical stripe (P07's grammar); the QA check repeats on build frames. The QA open/close sheet repeats this check on real build frames (MOTION_SYSTEM test 15).
 
 **Why A gets 4, not 5, for "never a chart library".** Two overlapping circles are a Venn diagram, and venn.js (reference 7) can draw one. Section 7 fences it: no outlines, no letters, no centred labels, no flat translucent fills, never more than two discs, always giant or at scene size with light that adds to white, and the chance ghost and pull, which no library draws.
 
@@ -410,7 +410,7 @@ There are no spinners and no artificial delays.
 - **Set labels:** anchor name and `{{na}} BASKETS` right-aligned at the anchor's far side (D x 507, y 636); partner name and `{{nb}} BASKETS` left-aligned beyond the partner's near-rim side (D x 1180, y 636).
 - **Bottom-left chip:** `{{tag}} · 1 ITEM PAIR · UCI ONLINE RETAIL II · CC BY 4.0` (tag from `baskets.tags`). The DOI is a link in the chip.
 - **LCP rule.** `h1[data-hero]` is in the DOM from first paint as ghost text, never at opacity 0.
-- **Insight.** The pair of products bought together most often is bought together six times more often than chance would explain.
+- **Insight.** The pair of products bought together most often is bought together `{{hero_pair_lift}}` times more often than chance would explain (DR-1; 6.26 in the CD fixture).
 - **Interactions.**
   - SKIP INTRO is visible from 0ms. Esc, or any wheel, touch or key scroll, completes the intro in 350ms.
   - It plays once per session (`sessionStorage`, in try/catch). REPLAY INTRO is in the nav and in S08.
@@ -484,7 +484,7 @@ There are no spinners and no artificial delays.
 - **Behaviour.**
   - Scroll p 0.04-0.96 steps month m = 0..24 for the selected cohort (default: the first, `cohort_months[0]`). Each m is a published value: `retention[c][m]` and `sizes[c]`, with the active set size from DR-3.
   - The anchor (the cohort, rose) holds its size. The partner (the active customers that month, orange) changes size month to month (seasonal peaks visibly swell it), and the overlap shrinks and dims as the cohort thins: C's graft.
-  - Month 0: the cohort is inside that month's active set (internally tangent): everyone in a cohort bought in month 0.
+  - Month 0: the cohort is inside that month's active set (internally tangent; `retention[c][0]` = 1.0 at `27f17e2`). For the first cohort the two are near-identical (CD fixture: 951 in the cohort, 955 active in December 2009), so month 0 carries `ALMOST THE SAME SET: IN THE FIRST MONTH, NEARLY EVERY ACTIVE CUSTOMER IS NEW`. **The scroll scrub starts at month 1** (p 0.04); month 0 is reachable with ◀ and in reduced motion.
   - UNIT `CUSTOMERS | REVENUE` switches to `revenue_retention` (anchor = the cohort's month-0 revenue; overlap = its month-m revenue; partner = all known-customer revenue that month, DR-3). The discs re-size; the axis holds.
   - `right_censoring` verbatim, uppercased, beside the strip.
 - **Data:** `cohorts.{cohort_months, offsets, sizes, retention, revenue_retention, mean_curve, right_censoring, definition, notes}`, DR-3.
@@ -498,7 +498,7 @@ There are no spinners and no artificial delays.
 
 | p | State |
 |---|---|
-| 0.10 | **Heads.** Anchor = recent customers (R score ≥ 4), partner = frequent customers (F score ≥ 4), unit CUSTOMERS. Overlap = recent and frequent. Ledger: `{{n_rf}} OF {{rfm_customers}} CUSTOMERS ARE BOTH RECENT AND FREQUENT ({{share}})`, from `rfm.grid.r_by_f_customers` summed over the thresholds |
+| 0.10 | **Heads.** Scores are 1-5: R and M by quintile edges of the known customers, F by fixed bins (`rfm.bins`, `rfm.definition.scoring`). Anchor = recent customers (R score ≥ 4), partner = frequent customers (F score ≥ 4), unit CUSTOMERS. Overlap = recent and frequent. Ledger: `{{n_rf}} OF {{rfm_customers}} CUSTOMERS ARE BOTH RECENT AND FREQUENT ({{share}})`, from `rfm.grid.r_by_f_customers` summed over the thresholds |
 | 0.45 | **Pounds** (the transformation). The unit switches to GBP (`rfm.grid.r_by_f_revenue_gbp`): both discs re-size in log space and the overlap swells. The scene's `k` changes **once**, at this step, and the encoding label crossfades `AREA = CUSTOMERS` → `AREA = GBP`. Ledger: `THEY BRING £{{rev_rf}} ({{rev_share}} OF KNOWN-CUSTOMER REVENUE)` |
 | 0.80 | **Name them.** The named segments appear as a mono list under the ledger (`rfm.segments[]`: segment, customers, revenue share, rule), the champions line white: `CHAMPIONS: {{rfm_champions_share_customers}} OF CUSTOMERS, {{rfm_champions_share_revenue}} OF REVENUE` |
 
@@ -508,7 +508,7 @@ There are no spinners and no artificial delays.
 - **Tags.** DERIVED; `rfm.included.excluded_guest_revenue_share` as the guests line; `rfm.definition.scoring` and `.ties` verbatim in the inspector.
 - **Interactions** (interaction 5): R ≥ (1-5), F ≥ (1-5), UNIT `CUSTOMERS | GBP`, PAIR `R x F | R x M | F x M` (needs DR-4).
 - **Transition to S05.** Both discs crossfade to the stock pair (a new unit: units of one item).
-- **States.** A threshold with zero customers on one side: that disc is not drawn; `NO CUSTOMER SCORES {{dim}} ≥ {{t}}`. **Reset:** R ≥ 4, F ≥ 4, customers.
+- **States.** A threshold with zero customers on one side: that disc is not drawn; `NO CUSTOMER SCORES {{dim}} ≥ {{t}}`. R ≥ 1 and F ≥ 1 together: the identical-set state (section 0). **Reset:** R ≥ 4, F ≥ 4, customers.
 
 #### S05 Experiment: how many to stock (300vh; the stage stays pinned until 1)
 
@@ -519,8 +519,8 @@ There are no spinners and no artificial delays.
 | p | State |
 |---|---|
 | 0.08 | The default item at the default assumptions: `q*` at the critical fractile; ledger `ORDER {{q}} · EXPECTED SOLD {{sales}} · LEFT OVER {{leftover}} · SHORT {{shortage}} · CRITICAL RATIO {{cf}}` |
-| 0.30 | **Cheaper to make** (cost ratio at its range minimum): the partner grows; the leftover crescent grows, the shortage crescent shrinks |
-| 0.52 | **Dearer to make** (cost ratio at its range maximum): the reverse |
+| 0.30 | **Cheaper to make** (cost ratio at its range minimum, `assumptions[cost_ratio].range[0]`, 0.3 at `27f17e2`): the partner grows; the leftover crescent grows, the shortage crescent shrinks |
+| 0.52 | **Dearer to make** (cost ratio at its range maximum, `range[1]`, 0.9): the reverse |
 | 0.74 | **The policy check:** `newsvendor_scenarios.policy_check`: `OVER {{weeks}} WEEKS, ORDERING AT THE NEWSVENDOR QUANTITY EARNS {{uplift_pct}} MORE THAN ORDERING THE MEAN · {{caveat}}` |
 | 0.86-1 | Free: every control live |
 
@@ -529,7 +529,11 @@ There are no spinners and no artificial delays.
 - **Tags.** SIMULATED; `newsvendor_params.disclaimer` and `facts.not_advice` verbatim, uppercased, always visible.
 - **Interactions** (interaction 6): ITEM, COST RATIO and SALVAGE RATIO (sliders within `assumptions[].range`), MODEL, ORDER OVERRIDE (a slider for `q`; the ledger then shows the expected profit against `q*`).
 - **Transition to S06.** The partner recolours to periwinkle as the scene becomes the forecast pair (800ms).
-- **States.** **Disabled:** EMPIRICAL is disabled for an item with fewer than 26 sample weeks (`items[].weeks`), with that reason. A normal fit with mass below zero (sd > mean) prints `NORMAL FIT ALLOWS NEGATIVE DEMAND · EMPIRICAL IS SAFER HERE` (CD fixture: the top item has mean 688 and SD 564, so this will occur). **Reset:** the default item and assumptions, NORMAL.
+- **States.**
+  - **Disabled:** EMPIRICAL is disabled for an item with fewer than 26 sample weeks (`items[].weeks`; 26 is a **design constant**, half a year of weeks; every item at `27f17e2` has 52, so it does not trigger today).
+  - **Negative-demand warning:** when the normal fit puts more than 5% of its mass below zero, `P(D < 0) = Φ(−μ / σ)` from `items[].mean_weekly_units` and `sd_weekly_units`, the ledger prints `NORMAL FIT PUTS {{p}} OF DEMAND BELOW ZERO · EMPIRICAL IS SAFER HERE` (5% is a design constant). At `27f17e2`, `sku:84077` (mean 971, SD 935) gives about 15%; the family series stay under 1%.
+  - **ORDER OVERRIDE floor:** under NORMAL, a small `q` makes `E[min(D, q)]` negative, which has no geometry. The slider's minimum is `q_floor`, the smallest `q` with expected sales ≥ 0 (solved by bisection on the published formula); under EMPIRICAL the minimum is 0. A disc is never drawn with a negative area.
+  - **Reset:** the default item and assumptions (`assumptions[].value`: cost ratio 0.6, salvage ratio 0.2 at `27f17e2`), NORMAL. The S05 sketch uses 0.5 and 0.1 (drawn before the artifact existed); the build uses the published defaults.
 
 #### S06 Consequences: what will sell, and who will come back (300vh)
 
@@ -539,8 +543,8 @@ Two PREDICTED pairs in sequence. Both use the periwinkle partner with the interv
 |---|---|
 | 0.06 | **The forecast pair.** Anchor = actual units over the backtest (all series, horizon 1), partner = the best model's forecast units, overlap = Σ min(actual, forecast). Ledger: `WAPE {{wape}} · BIAS {{bias}} · SKILL VS SEASONAL NAIVE {{skill}} · {{origins}} ORIGINS` (`backtest.pooled`, DR-5 for the areas) |
 | 0.22 | **The baseline.** The partner swaps to seasonal-naive (the same actual). Whichever has the larger crescents is the worse forecast, visibly. `backtest.verdict` verbatim |
-| 0.38 | **Horizon 4.** The crescents grow with the horizon (or they don't: the data decides) |
-| 0.54 | **One series.** `forecast.series[0]` (a family): the soft edge is its 80% interval for the next week (`lo`, `hi`); `interval_coverage`: `{{nominal}} INTERVAL COVERED {{empirical}} OF {{n}} BACKTEST WEEKS` |
+| 0.38 | **Horizon 8** (the last of `backtest.design.horizons` = 1, 2, 4, 8). The crescents grow with the horizon (or they don't: the data decides) |
+| 0.54 | **One series.** `forecast.series[0]` (a family): the soft edge is its `{{interval.level}}` interval for the next week (`forecast.interval.level` = 0.8, `lo`, `hi`, method `forecast.interval.method`); `interval_coverage`: `{{nominal}} INTERVAL COVERED {{empirical}} OF {{n}} BACKTEST WEEKS` |
 | 0.70 | **The CLV pair.** Anchor = actual holdout repeat purchases (`clv.holdout.actual_repeats_total`), partner = BG/NBD predicted (`predicted_repeats_total`), overlap = Σ over deciles of min(actual, predicted) (`clv.deciles`). Ledger: `{{holdout_weeks}}-WEEK HOLDOUT · TOTAL ERROR {{total_error_pct}} · DECILE MAPE {{mape}} · CUSTOMER MAE {{mae}} VS NO-MODEL {{baseline_mae}}` |
 | 0.86 | **The baseline again.** The partner swaps to the no-model baseline (DR-6) |
 
@@ -548,7 +552,7 @@ Two PREDICTED pairs in sequence. Both use the periwinkle partner with the interv
 - **Data:** `backtest.{pooled, win_rate, verdict, interval_coverage, design, models}`, `forecast.series`, `clv.{holdout, deciles, by_frequency, calibration, final_fit, limitations}`, `facts.forecast_*`, `facts.clv_*`, DR-5, DR-6.
 - **Insight.** The forecast beats seasonal-naive on {{forecast_win_rate}} of series, not all; the CLV model's predicted repeats land within {{clv_total_error_pct}} of what happened. Both checks are on screen, and both can lose.
 - **Tags.** PREDICTED; the check beside every number; `clv.limitations[0]` verbatim.
-- **Interactions** (interaction 7): MODEL (`backtest.models[].id`), HORIZON (1-4), SCOPE `ALL | FAMILY | SKU`, DECILE (1-10).
+- **Interactions** (interaction 7): MODEL (`backtest.models[].id`), HORIZON (`backtest.design.horizons`: 1, 2, 4, 8), SCOPE `ALL | FAMILY | SKU`, DECILE (1-10).
 - **Transition to S07.** The pair dims to 15% and moves to G1 behind the argument stack.
 - **States.** A model with `n = 0` for a scope: disabled with `NOT EVALUATED AT THIS SCOPE`. **Reset:** best model, horizon 1, all.
 
@@ -692,7 +696,7 @@ There are eleven interactions. Six are driven by visitor-set analytical paramete
 ### 7. What Will Sell (S06) [P]
 
 - **Inputs:** scroll steps, MODEL, HORIZON, SCOPE, DECILE.
-- **State:** `{model, horizon: 1..4, scope: 'all' | 'family' | 'sku', decile: 1..10 | null}`.
+- **State:** `{model, horizon: 1 | 2 | 4 | 8, scope: 'all' | 'family' | 'sku', decile: 1..10 | null}`.
 - **Data:** `backtest`, `forecast`, `clv`, DR-5, DR-6.
 - **Visual output:** the forecast pair (and its baseline), the interval soft edge, the CLV pair by decile.
 - **Keyboard:** radio groups and spinbuttons.
@@ -830,7 +834,7 @@ Rules:
 | DR-2 | **Rule steps.** `baskets.showcase`: an ordered list of 6 rule indices: the 3 highest-lift rules **with `variant_of_same_product` false** then the 3 highest-count rules, the hero pair excluded, no rule twice; plus the rule that produced it. Also add `variant_of_same_product` to `baskets.schema.json` (present in the artifact at `27f17e2`, absent from the schema), and publish the edge for the DR-1 hero pair so THE COUNTER can reach it | S03a's steps are data-chosen, not designer-chosen | tiny |
 | DR-3 | **Active set per month.** In `cohorts.json`: `active_customers[]` (known customers with at least one sale line in each `cohort_months` calendar month, same definition as cohort activity) and `active_revenue_gbp[]` (their net revenue that month), aligned to `cohort_months`. Also confirm `overview.series.active_customers` uses the same definition, or say how it differs | The partner disc of every cohort pair (S03b) | 2 x 25 numbers |
 | DR-4 | **RFM grids for every pair.** `rfm.grid.r_by_m_customers`, `r_by_m_revenue_gbp`, `f_by_m_customers`, `f_by_m_revenue_gbp` (5 x 5 each), same scoring as `r_by_f` | S04 PAIR control and THE COUNTER | 100 numbers |
-| DR-5 | **Backtest area totals.** Per `backtest.pooled` row: `actual_total`, `forecast_total`, `over_total` (Σ max(f − a, 0)), `under_total` (Σ max(a − f, 0)); and the exact definition of `bias_pct` in `backtest.design` | S06 forecast pair areas must be exact, not recovered from rounded percentages | about 4 numbers per pooled row |
+| DR-5 | **Backtest area totals.** Per `backtest.pooled` row: `actual_total`, `forecast_total`, `over_total` (Σ max(f − a, 0)), `under_total` (Σ max(a − f, 0)); and the sign convention of `e` in `backtest.design.metrics` ("bias = sum e / sum actual" does not say whether e = f − a or a − f) | S06 forecast pair areas must be exact, not recovered from rounded percentages | about 4 numbers per pooled row |
 | DR-6 | **CLV overlap and baseline.** `clv.holdout.overlap_customer_sum` (Σ over customers of min(predicted_i, actual_i)), `baseline_predicted_total`, `baseline_overlap_customer_sum`; and per decile the baseline's predicted value | S06 CLV pair at customer level, and its no-model baseline | tiny |
 | DR-7 | **Newsvendor expectations in scenarios.** Add `expected_sales`, `expected_leftover`, `expected_shortage` (normal and empirical) to each `newsvendor_scenarios.scenarios[]` row; ensure `newsvendor_vectors` covers every item at the default assumptions for both models | A precomputed fallback if the client maths fails a guard; parity for every default state | about 6 numbers per scenario row |
 | DR-8 | **Refund split.** In `reconciliation.refunds`: `matched_value_gbp`, `unmatched_no_prior_sale_qty`, `unmatched_no_prior_sale_value_gbp`, `unmatched_no_customer_qty`, `unmatched_no_customer_value_gbp`, `over_refund_qty`; and `sale_units` (or confirm `classes[sale].units`) | S02 card 2's pair: the partner's lone crescent must be split by reason | tiny |

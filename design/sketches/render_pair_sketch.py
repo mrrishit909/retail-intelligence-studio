@@ -67,14 +67,15 @@ def pair_svg(W, H, ca, ra, rb, overlap, axis, ramps=(ROSE, ORANGE), ghost=None, 
         body.append(f'<circle cx="{gx:.1f}" cy="{gy:.1f}" r="{rb:.1f}" fill="#fff" fill-opacity="0.06"/>')
     g, c = disc("gb", cb[0], cb[1], rb, -ux, -uy, ramps[1], "plus-lighter", alpha=1.35); defs.append(g); body.append(c)
     if glow and d < ra + rb:
-        inner = max(d - rb, -ra)                                          # lens near end along the axis
-        lx = (inner + ra) / 2                                             # lens midpoint along the axis
-        mx, my = ca[0] + ux * lx, ca[1] + uy * lx
-        half = (ra - inner) / 2
+        inner = max(d - rb, -ra)                                          # overlap's near end along the axis
+        p0 = (ca[0] + ux * inner, ca[1] + uy * inner)
+        p1 = (ca[0] + ux * ra, ca[1] + uy * ra)                           # overlap's far end along the axis
+        # luminance peaks on the overlap's midline and falls symmetrically to both arcs (no point-centred glow)
         defs.append(f'<clipPath id="ov"><circle cx="{ca[0]:.1f}" cy="{ca[1]:.1f}" r="{ra:.1f}"/></clipPath>'
-                    f'<radialGradient id="hot" gradientUnits="userSpaceOnUse" cx="{mx:.1f}" cy="{my:.1f}" r="{max(half, 40) * 1.6:.1f}">'
-                    '<stop offset="0" stop-color="#FFFFFF" stop-opacity="0.98"/><stop offset="0.45" stop-color="#FFE9E2" stop-opacity="0.85"/>'
-                    '<stop offset="1" stop-color="#FF9A8A" stop-opacity="0.35"/></radialGradient>'
+                    f'<linearGradient id="hot" gradientUnits="userSpaceOnUse" x1="{p0[0]:.1f}" y1="{p0[1]:.1f}" x2="{p1[0]:.1f}" y2="{p1[1]:.1f}">'
+                    '<stop offset="0" stop-color="#FF9A8A" stop-opacity="0.35"/><stop offset="0.22" stop-color="#FFE9E2" stop-opacity="0.85"/>'
+                    '<stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.98"/><stop offset="0.78" stop-color="#FFE9E2" stop-opacity="0.85"/>'
+                    '<stop offset="1" stop-color="#FF9A8A" stop-opacity="0.35"/></linearGradient>'
                     '<filter id="bl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>')
         body.append(f'<g clip-path="url(#ov)"><circle cx="{cb[0]:.1f}" cy="{cb[1]:.1f}" r="{rb:.1f}" fill="url(#hot)" style="mix-blend-mode:plus-lighter"/></g>')
         body.append(f'<g style="mix-blend-mode:screen" opacity="0.35" filter="url(#bl)"><g clip-path="url(#ov)">'
