@@ -39,14 +39,21 @@ Credit-note lines (`C` invoices) are refunds. Each is matched, within the same C
 sale lines with unrefunded quantity (LIFO). Matched, unmatched-no-customer, unmatched-no-prior-sale and over-refund quantities are all published.
 Refunds are never netted into the sale lines they match; they reduce monetary value and are excluded from frequency/purchase counts.
 
-## Elasticity decision rule (fixed before the evidence is computed)
-Weekly price of a SKU = the most frequent unit price among its sale lines that week (ties: higher). A SKU **qualifies** when it has
-at least 26 weeks with sales, at most 90% of those weeks at its overall modal price, and at least 3 price regimes (distinct weekly
-prices each observed in at least 4 weeks). Elasticity is **estimable** only if at least 30 SKUs qualify. Otherwise the studio declares
-"not estimable", publishes the price-variation table, and says what would be needed. No elasticity number is ever shown otherwise.
+## Elasticity decision rule
+**Stage 1 (price variation, fixed before the evidence was computed).** Weekly price of a SKU = the most frequent unit price among its sale lines
+that week (ties: higher). A SKU qualifies when it has at least 26 weeks with sales, at most 90% of those weeks at its overall modal price, and at
+least 3 price regimes (distinct weekly prices each observed in at least 4 weeks). Stage 1 passes if at least 30 SKUs qualify.
+
+**Stage 2 (identification), added after Stage 1 was computed.** Stage 1 passed by a wide margin (see `elasticity.json`), but the price spread
+looked like customer-level price tiers rather than list-price changes, so a second test was written before any elasticity regression was run.
+Using the qualifying SKUs only: (a) the share of within-SKU log-price variance that lies *within* a single SKU-week must be at most 25%
+(otherwise price differs by buyer, not by time); (b) for SKU-weeks with several prices and at least 5 lines, the median Spearman correlation between
+line quantity and unit price must be above -0.2 in absolute value (otherwise price is set by order size, which makes price endogenous to quantity).
+Elasticity is **estimable** only if both stages pass. Otherwise the studio declares "not estimable", publishes the price-variation evidence,
+and says what would be needed. No elasticity number is ever shown in that case. The stage-2 amendment is disclosed in the artifact and in `LIMITATIONS.md`.
 
 ## Backtest and CLV design (fixed up front)
-- Forecast: weekly units, complete Monday weeks only. Rolling origin, expanding window, minimum 60 training weeks, horizons 1 to 4 weeks (forecast out to 8).
+- Forecast: weekly units, complete Monday weeks only. Rolling origin, expanding window, minimum 60 training weeks, horizons 1 to 8 weeks evaluated (pooled tables at 1, 2, 4, 8), forecast out to 8.
   Baseline = seasonal-naive with lag 52. Metrics: MAE, WAPE, MASE, bias, skill = 1 - MAE_model / MAE_snaive. Models that lose are published.
 - CLV: calibration 2009-12-01 to 2011-06-09, holdout 2011-06-10 to 2011-12-09 (26 weeks). Transactions are distinct purchase days per customer.
   Compared against a no-model baseline (every customer gets the average calibration repeat rate scaled by exposure).
