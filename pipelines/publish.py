@@ -18,6 +18,7 @@ from analytics import baskets as bk, clv, cohorts, data, elasticity as el, forec
 from pipelines.common import ATTRIBUTION, DOI, LEDGER, MANIFESTS, PIPELINE_VERSION, PUBLIC, SEED, URL, write_json
 
 OBS, DER, PRED, SIM = "OBSERVED", "DERIVED", "PREDICTED", "SIMULATED"
+MODEL_LABELS = {"snaive": "Seasonal naive (same week last year)", "mean4": "4-week mean", "ets": "Damped-trend smoothing", "seasonal_ratio": "Seasonal ratio", "ensemble": "Ensemble (smoothing + seasonal ratio)"}
 GBP = "GBP"
 
 
@@ -159,9 +160,12 @@ def run() -> dict:
         segs.append({"segment": nm, "rule": rule, "customers": int(m.sum()), "customer_share": float(m.mean()), "revenue_gbp": round(float(mon[m].sum()), 2),
                      "revenue_share": float(mon[m].sum() / mon.sum()), "avg_recency_days": float(rec[m].mean()) if m.any() else 0.0,
                      "avg_frequency": float(fr[m].mean()) if m.any() else 0.0, "avg_monetary_gbp": float(mon[m].mean()) if m.any() else 0.0, "action_note": note})
-    rg = np.zeros((5, 5), dtype=int); rgm = np.zeros((5, 5))
-    for r_, f_, m_ in zip(df["r"], df["f"], df["monetary"]):
-        rg[r_ - 1, f_ - 1] += 1; rgm[r_ - 1, f_ - 1] += m_
+    def grid2(a_, b_):
+        gc = np.zeros((5, 5), dtype=int); gm = np.zeros((5, 5))
+        for i_, j_, m_ in zip(df[a_], df[b_], df["monetary"]):
+            gc[i_ - 1, j_ - 1] += 1; gm[i_ - 1, j_ - 1] += m_
+        return gc, np.round(gm, 0)
+    rg, rgm = grid2("r", "f"); rm_c, rm_g = grid2("r", "m"); fm_c, fm_g = grid2("f", "m")
     sl = Q("select count(*) filter (where is_guest), count(*), sum(amount) filter (where is_guest), sum(amount) from fact_lines where line_class='sale'")[0]
     srt = np.sort(mon)[::-1]
     out["rfm"] = {"schema_version": "v1", "tags": {"definition": DER, "segments": DER, "grid": DER, "customers": DER}, "snapshot_date": ds(rf.SNAPSHOT),
@@ -172,7 +176,8 @@ def run() -> dict:
                        "ties": "Quintile edges are cut with numpy.quantile at 0.2, 0.4, 0.6, 0.8; a value equal to an edge falls in the higher bin."},
         "bins": {"recency_days_edges": py(R["r_edges"]), "frequency_edges": [2, 3, 5, 9], "monetary_gbp_edges": py(R["m_edges"], 2)},
         "included": {"customers": df.height, "excluded_guest_line_share": sl[0] / sl[1], "excluded_guest_revenue_share": sl[2] / sl[3], "customers_with_only_refunds": n_cust - df.height},
-        "segments": segs, "grid": {"r_by_f_customers": rg.tolist(), "r_by_f_revenue_gbp": py(np.round(rgm, 0))},
+        "segments": segs, "grid": {"r_by_f_customers": rg.tolist(), "r_by_f_revenue_gbp": py(rgm), "r_by_m_customers": rm_c.tolist(), "r_by_m_revenue_gbp": py(rm_g),
+                 "f_by_m_customers": fm_c.tolist(), "f_by_m_revenue_gbp": py(fm_g), "axes": "Row index = first axis score 1 to 5, column index = second axis score 1 to 5. Recency score 5 = most recent."},
         "customers": {"key": py(df["customer_key"].to_numpy()), "recency_days": py(rec), "frequency": py(fr), "monetary_gbp": py(np.round(mon, 2)), "r": py(df["r"].to_numpy()),
                       "f": py(df["f"].to_numpy()), "m": py(df["m"].to_numpy()), "segment": py(seg), "country": [cidx[c] for c in df["country"]]},
         "segment_names": rf.NAMES, "country_names": countries_all}
@@ -180,6 +185,9 @@ def run() -> dict:
     F("rfm_customers", df.height, "customers", DER)
     F("rfm_champions_share_customers", ch["customer_share"], "share", DER); F("rfm_champions_share_revenue", ch["revenue_share"], "share", DER)
     F("rfm_lost_share_customers", lost["customer_share"], "share", DER)
+    rfm_m = (df["r"].to_numpy() >= 4) & (df["f"].to_numpy() >= 4)
+    F("rfm_rf_share_customers", float(rfm_m.mean()), "share", DER, "R score >= 4 and F score >= 4.")
+    F("rfm_rf_share_revenue", float(mon[rfm_m].sum() / mon.sum()), "share", DER, "Net GBP share of customers with R >= 4 and F >= 4.")
     F("rfm_top_decile_revenue_share", float(srt[: len(srt) // 10].sum() / srt.sum()), "share", DER)
 
     # ------------------------------------------------------------ cohorts
@@ -192,10 +200,17 @@ def run() -> dict:
             if np.isfinite(C["retention"][i, k]):
                 wsum[k] += C["retention"][i, k] * C["sizes"][i]; wcnt[k] += C["sizes"][i]; ncoh[k] += 1
     mean_curve = [float(wsum[k] / wcnt[k]) if wcnt[k] else None for k in range(nC)]
+    cm = C["months"]
+    act_rows = {m_: (n_, s_, nt_) for m_, n_, s_, nt_ in Q("""select month, count(distinct customer_key) filter (where line_class='sale'),
+        coalesce(sum(amount) filter (where line_class='sale' and customer_key is not null), 0),
+        coalesce(sum(amount) filter (where customer_key is not null), 0) from fact_lines group by 1""")}
     out["cohorts"] = {"schema_version": "v1", "tags": {"retention": DER, "revenue_retention": DER, "mean_curve": DER}, "definition": "Cohort = month of the customer's first sale invoice in the ledger. Retention(k) = share of the cohort with at least one sale invoice in month first+k. Revenue retention = cohort net sale GBP in month k over month 0.",
         "min_cohort_size": int(min(C["sizes"])), "cohort_months": C["months"], "sizes": [int(s) for s in C["sizes"]], "offsets": offs,
         "retention": toL(C["retention"]), "revenue_retention": toL(C["revenue_retention"]), "orders_per_active": toL(C["orders_per_active"]),
         "mean_curve": {"offsets": offs, "retention": [None if v is None else round(v, 4) for v in mean_curve], "n_cohorts": [int(v) for v in ncoh]},
+        "active_customers": [int(act_rows[m_][0]) for m_ in cm], "active_revenue_gbp": [round(float(act_rows[m_][1]), 2) for m_ in cm],
+        "active_net_revenue_gbp": [round(float(act_rows[m_][2]), 2) for m_ in cm],
+        "active_definition": "Known customers (Customer ID present) with at least one sale line in the calendar month, the same activity definition as cohort retention (all cohorts together, including customers from later cohorts). active_revenue_gbp = their sale-line GBP (the basis of revenue_retention); active_net_revenue_gbp also nets their credit-note lines. overview.series.active_customers uses the same definition and also includes the partial month 2011-12.",
         "notes": ["The 2009-12 cohort (951 customers) mixes true new customers with existing customers whose first purchase was before the ledger starts (left-censoring); it is not a clean acquisition cohort.",
                   "Months after 2011-11 are not observed (the ledger ends on 2011-12-09); 2011-12 is dropped as partial. Later cohorts therefore have fewer offsets.",
                   "Guest rows (no Customer ID) cannot be tracked and are excluded."],
@@ -215,9 +230,28 @@ def run() -> dict:
         w = (dmeta[sku][1] or "").upper().split()
         return (" ".join(w[:2]), " ".join(w[-2:]))
 
-    def is_variant(items):
-        st = [stem(sk_of(i)) for i in items]
+    def is_variant_sku(sk_list):
+        st = [stem(s_) for s_ in sk_list]
         return len({s[0] for s in st}) == 1 or len({s[1] for s in st}) == 1
+
+    def is_variant(items):
+        return is_variant_sku([sk_of(i) for i in items])
+
+    # DR-1 hero pair: over ALL pairs of product SKUs (not limited by the support threshold), the most baskets in common
+    CC = (X.T @ X).tocoo()
+    cnt_all = np.asarray(X.sum(0)).ravel()
+    msk = CC.row < CC.col
+    ra_, rb_, rn_ = CC.row[msk], CC.col[msk], CC.data[msk].astype(np.int64)
+    lift_all = rn_ * nb / (cnt_all[ra_] * cnt_all[rb_])
+    order_ = np.lexsort((np.array([skus[j] + "|" + skus[k] for j, k in zip(ra_, rb_)]), -lift_all, -rn_))
+    heroes = []
+    for o_ in order_[:5]:
+        ia, ib = int(ra_[o_]), int(rb_[o_])
+        if (cnt_all[ia], skus[ib]) < (cnt_all[ib], skus[ia]):
+            ia, ib = ib, ia  # anchor = the larger set (ties: SKU order)
+        heroes.append((skus[ia], skus[ib], int(cnt_all[ia]), int(cnt_all[ib]), int(rn_[o_]), float(lift_all[o_])))
+    ha, hb, hna, hnb, hnab, hlift = heroes[0]
+    hero_set = frozenset((ha, hb))
 
     rows = []
     for ante, cons, c, sup, conf, lift, lev, conv in allr:
@@ -227,14 +261,29 @@ def run() -> dict:
                      "consequent_desc": [(dmeta[sk_of(i)][1] or "").title() for i in cons], "support": sup, "confidence": conf, "lift": lift, "leverage": lev,
                      "conviction": None if conv is None else float(conv), "count": int(c), "same_family": len(fm) == 1, "families": fm, "variant_of_same_product": bool(is_variant(items))})
     rows.sort(key=lambda r: (-r["lift"], r["antecedent"], r["consequent"]))
-    pick = [r for r in rows if not r["variant_of_same_product"]][:40] + [r for r in rows if r["variant_of_same_product"]][:20]
+    # DR-2 showcase: 3 highest-lift then 3 highest-count rules, non-variant, hero pair excluded, one rule per itemset
+    iset = lambda r: frozenset(r["antecedent"] + r["consequent"])  # noqa: E731
+    cand_ = [r for r in rows if not r["variant_of_same_product"] and iset(r) != hero_set]
+    show, used = [], set()
+    for r in cand_:  # rows are sorted by lift desc
+        if iset(r) not in used and len([s_ for s_ in show if s_[1] == "lift"]) < 3:
+            used.add(iset(r)); show.append((r, "lift"))
+    for r in sorted(cand_, key=lambda r: (-r["count"], -r["lift"], r["antecedent"], r["consequent"])):
+        if iset(r) not in used and len([s_ for s_ in show if s_[1] == "count"]) < 3:
+            used.add(iset(r)); show.append((r, "count"))
+    assert len(show) == 6
+    pick = [s_[0] for s_ in show] + [r for r in rows if not r["variant_of_same_product"]][:40] + [r for r in rows if r["variant_of_same_product"]][:20]
     pick += [r for r in rows if not r["same_family"] and not r["variant_of_same_product"]][:20]
     seen, sel = set(), []
     for r in pick:
         k = (tuple(r["antecedent"]), tuple(r["consequent"]))
         if k not in seen:
             seen.add(k); sel.append(r)
-    sel.sort(key=lambda r: -r["lift"])
+    sel.sort(key=lambda r: (-r["lift"], r["antecedent"], r["consequent"]))
+    key_ = lambda r: (tuple(r["antecedent"]), tuple(r["consequent"]))  # noqa: E731
+    pos_ = {key_(r): i for i, r in enumerate(sel)}
+    showcase = {"rule": "3 highest-lift rules, then 3 highest-count rules, all with variant_of_same_product false, the hero pair excluded, one rule per itemset (a rule and its reverse count once); chosen over all mined rules, then forced into the published list.",
+                "indices": [pos_[key_(s_[0])] for s_ in show], "kinds": [s_[1] for s_ in show], "itemsets": [s_[0]["antecedent"] + s_[0]["consequent"] for s_ in show]}
     deg = {}
     pe = []
     for (a, b), c in pairs.items():
@@ -245,15 +294,32 @@ def run() -> dict:
         deg[a] = deg.get(a, 0) + 1; deg[b] = deg.get(b, 0) + 1
     nodes = [{"sku": sk_of(i), "description": (dmeta[sk_of(i)][1] or "").title(), "family": dmeta[sk_of(i)][0], "support": float(c1f[i] / nb), "baskets": int(c1f[i]), "degree": d_}
              for i, d_ in sorted(deg.items(), key=lambda t: -t[1])]
-    out["baskets"] = {"schema_version": "v1", "tags": {"params": DER, "rules": DER, "nodes": DER, "edges": DER},
+    skix = {s_: i for i, s_ in enumerate(skus)}
+    hero_edge = {"a": ha, "b": hb, "support": hnab / nb, "lift": hlift, "count": hnab, "same_family": dmeta[ha][0] == dmeta[hb][0], "hero": True}
+    hero_rule = ("Over all pairs of product SKUs (any support), the pair with the most baskets in common; ties: higher lift, then SKU order. Anchor = the larger set. "
+                 "chance = na * nb / baskets; lift = nab * baskets / (na * nb).")
+    out["baskets"] = {"schema_version": "v1", "tags": {"params": DER, "rules": DER, "nodes": DER, "edges": DER, "showcase": DER, "hero": DER}, "showcase": showcase,
+        "hero": {"a": ha, "b": hb, "a_desc": (dmeta[ha][1] or "").title(), "b_desc": (dmeta[hb][1] or "").title(), "na": hna, "nb": hnb, "nab": hnab, "baskets": nb, "chance": hna * hnb / nb, "lift": hlift,
+                 "support": hnab / nb, "confidence_a_to_b": hnab / hna, "confidence_b_to_a": hnab / hnb, "same_family": hero_edge["same_family"],
+                 "variant_of_same_product": bool(is_variant_sku([ha, hb])), "selection_rule": hero_rule,
+                 "runner_up": [{"a": a_, "b": b_, "nab": n_, "lift": l_} for a_, b_, _na, _nb, n_, l_ in heroes[1:]] or [{"a": "", "b": "", "nab": 0, "lift": 0.0}]},
         "params": {"min_support": bk.MIN_SUPPORT, "min_confidence": bk.MIN_CONFIDENCE, "min_lift": bk.MIN_LIFT, "max_len": bk.MAX_LEN, "baskets": nb, "frequent_items": len(f1),
                    "frequent_itemsets": len(f1) + len(pairs) + len(triples), "basket_definition": "One basket per invoice with at least one sale line (guest invoices included).",
                    "item_definition": "SKU (upper-cased); a SKU counts once per basket.", "support_count_min": minc},
         "rules_total": len(rows), "rules": sel,
-        "nodes": nodes, "edges": [{"a": sk_of(a), "b": sk_of(b), "support": c / nb, "lift": float(lf), "count": int(c), "same_family": dmeta[sk_of(a)][0] == dmeta[sk_of(b)][0]} for lf, a, b, c in pe_sel],
+        "nodes": nodes, "edges": [{"a": sk_of(a), "b": sk_of(b), "support": c / nb, "lift": float(lf), "count": int(c), "same_family": dmeta[sk_of(a)][0] == dmeta[sk_of(b)][0], "hero": False} for lf, a, b, c in pe_sel]
+                 + ([hero_edge] if not any({sk_of(a), sk_of(b)} == {ha, hb} for _l, a, b, _c in pe_sel) else []),
         "caveat": "Top-lift rules are dominated by colour and pattern variants of one product (flagged variant_of_same_product); the featured list shows non-variant rules first. Association is co-occurrence in one invoice, not causation, and wholesale buyers order many lines at once."}
     xf = sum(1 for r in rows if not r["same_family"])
     szs = np.asarray(X.sum(1)).ravel()
+    for e_ in out["baskets"]["edges"]:
+        if {e_["a"], e_["b"]} == {ha, hb}:
+            e_["hero"] = True
+    F("hero_pair_na", hna, "baskets", DER); F("hero_pair_nb", hnb, "baskets", DER); F("hero_pair_nab", hnab, "baskets", DER)
+    F("hero_pair_chance", hna * hnb / nb, "baskets", DER, "Baskets expected to contain both if the two were independent: na * nb / baskets.")
+    F("hero_pair_lift", hlift, "lift", DER)
+    F("hero_pair_a", ha, "SKU", DER); F("hero_pair_b", hb, "SKU", DER); F("hero_pair_a_desc", (dmeta[ha][1] or "").title(), "text", OBS); F("hero_pair_b_desc", (dmeta[hb][1] or "").title(), "text", OBS)
+    F("hero_selection_rule", hero_rule, "text", DER)
     F("basket_count", nb, "baskets", DER); F("basket_min_support", bk.MIN_SUPPORT, "share of baskets", DER, f"Itemset must appear in at least {minc} baskets.")
     F("basket_min_confidence", bk.MIN_CONFIDENCE, "share", DER); F("basket_frequent_items", len(f1), "SKUs", DER); F("basket_rules_total", len(rows), "rules", DER)
     F("basket_rules_cross_family", xf, "rules", DER); F("basket_top_lift", rows[0]["lift"], "lift", DER); F("basket_median_size_lines", float(np.median(szs)), "SKUs per basket", OBS)
@@ -270,9 +336,12 @@ def run() -> dict:
     pop_rate = x.sum() / T_.sum()
     base_pop = pop_rate * H * np.ones_like(x)
     base_ind = np.where(T_ > 0, x / np.maximum(T_, 1e-9) * H, 0.0)
+    ov_sum, base_ov_sum = float(np.minimum(pred, actual).sum()), float(np.minimum(base_pop, actual).sum())
     mae, mae_pop, mae_ind = np.abs(pred - actual).mean(), np.abs(base_pop - actual).mean(), np.abs(base_ind - actual).mean()
     order = np.argsort(pred, kind="stable"); dec = np.array_split(order, 10)
     deciles = [{"decile": i + 1, "customers": len(g), "predicted": float(pred[g].mean()), "actual": float(actual[g].mean()),
+                "predicted_sum": float(pred[g].sum()), "actual_sum": float(actual[g].sum()), "baseline_predicted": float(base_pop[g].mean()), "baseline_predicted_sum": float(base_pop[g].sum()),
+                "overlap_sum": float(np.minimum(pred[g], actual[g]).sum()),
                 "error_pct": float(100 * (pred[g].mean() - actual[g].mean()) / actual[g].mean()) if actual[g].mean() > 0 else 0.0} for i, g in enumerate(dec)]
     mape_dec = float(np.mean([abs(d_["error_pct"]) for d_ in deciles]))
     byf = []
@@ -313,7 +382,8 @@ def run() -> dict:
         "holdout": {"predicted_repeats_total": float(pred.sum()), "actual_repeats_total": int(actual.sum()), "total_error_pct": tot_err, "mae_customer": float(mae),
                     "baseline_mae_customer": float(mae_pop), "baseline_individual_rate_mae_customer": float(mae_ind), "corr_customer": corr, "rank_corr_customer": rho,
                     "baseline": "Population-average repeat rate (repeats per exposure week in calibration) times holdout weeks, identical for every customer. Alternative baseline, own history rate scaled to the holdout, is in baseline_individual_rate_mae_customer.",
-                    "mape_decile_pct": mape_dec},
+                    "mape_decile_pct": mape_dec,
+                    "overlap_customer_sum": ov_sum, "baseline_predicted_total": float(base_pop.sum()), "baseline_overlap_customer_sum": base_ov_sum},
         "deciles": deciles, "by_frequency": byf,
         "gamma_gamma_check": {"corr_frequency_monetary": ind_corr, "customers": rep.height, "note": "Gamma-Gamma assumes monetary value is independent of frequency; a correlation near 0 supports that. Fitted on customers with at least one repeat transaction."},
         "final_fit": {"fit_start": "2009-12-01", "fit_end": ds(clv.FINAL_END), "horizon_weeks": HOR, "discount_rate_annual": DISC, "customers": len(fx), "clv_total_gbp": float(clv_c.sum()),
@@ -343,7 +413,7 @@ def run() -> dict:
         for h in fc.POOL_H:
             pm = fc.pooled(ser_, err, origins, sids, h); base = pm["snaive"]["mae"]
             for m_, v in pm.items():
-                pooled_rows.append({"model": m_, "horizon": h, "scope": scope, **{k: float(v[k]) for k in ("mae", "wape_pct", "mase", "bias_pct")}, "skill_vs_snaive_pct": float(100 * (1 - v["mae"] / base)), "n": v["n"]})
+                pooled_rows.append({"model": m_, "horizon": h, "scope": scope, **{k: float(v[k]) for k in ("mae", "wape_pct", "mase", "bias_pct", "actual_total", "forecast_total", "over_total", "under_total")}, "skill_vs_snaive_pct": float(100 * (1 - v["mae"] / base)), "n": v["n"]})
                 sk_cmp[(m_, h, scope)] = v
     # choose best model: lowest mean pooled WAPE over scopes family and sku and horizons
     cand = [m_ for m_ in fc.MODELS if m_ != "snaive"]
@@ -409,8 +479,10 @@ def run() -> dict:
     out["backtest"] = {"schema_version": "v1", "tags": {"design": DER, "pooled": PRED, "win_rate": PRED, "interval_coverage": PRED},
         "design": {"scheme": "Rolling origin, expanding window, every weekly origin from week 60; one forecast vector per origin up to 8 weeks ahead.", "first_origin_week": ds(wk[origins[0]]), "last_origin_week": ds(wk[origins[-1]]),
                    "origins": len(origins), "horizons": fc.POOL_H, "min_train_weeks": fc.MIN_TRAIN, "series": len(ids), "baseline": "seasonal-naive, lag 52 weeks",
-                   "metrics": ["MAE (units)", "WAPE = sum|e| / sum actual", "MASE = |e| / in-sample naive-1 MAE at the origin", "bias = sum e / sum actual", "skill = 1 - MAE_model / MAE_snaive"]},
-        "models": [{"id": k, "description": v} for k, v in fc.MODELS.items()], "pooled": pooled_rows, "win_rate": win_rows, "by_series": by_series, "by_origin": by_origin,
+                   "metrics": ["MAE (units)", "WAPE = sum|e| / sum actual", "MASE = |e| / in-sample naive-1 MAE at the origin", "bias = sum e / sum actual", "skill = 1 - MAE_model / MAE_snaive"],
+                   "error_sign": "e = forecast - actual. Positive bias = over-forecast. over_total = sum max(f - a, 0), under_total = sum max(a - f, 0); over + under = sum |e| = MAE * n; actual - under = sum min(a, f); WAPE = (over + under) / actual.",
+                   "total_identities": "Pooled rows exist for horizons 1, 2, 4, 8 and scopes all, family, sku; totals are sums over series and origins."},
+        "models": [{"id": k, "label": MODEL_LABELS[k], "description": v} for k, v in fc.MODELS.items()], "pooled": pooled_rows, "win_rate": win_rows, "by_series": by_series, "by_origin": by_origin,
         "interval_coverage": {"nominal": 0.8, "empirical": float(np.mean(cover)), "n": len(cover)}, "verdict": verdict, "best_model": best}
     out["forecast"] = {"schema_version": "v1", "tags": {"history": OBS, "forecast": PRED, "interval": PRED}, "unit": "units per Monday week (sale lines only)", "week_start": ds(wk[0]), "weeks": [ds(w) for w in wk],
         "horizon_weeks": fc.HMAX, "forecast_weeks": [ds(w) for w in fut_weeks], "model": best,
@@ -422,7 +494,7 @@ def run() -> dict:
     F("forecast_family_skill_pct", skf("family"), "percent", PRED); F("forecast_sku_skill_pct", skf("sku"), "percent", PRED)
     allwin = sum(wins[best].values()) / len(ids)
     F("forecast_win_rate", allwin, "share", PRED, "Share of series where the best model has lower MAE than seasonal-naive (horizons 1 to 4)."); F("forecast_snaive_wape_pct", pr[("snaive", 1, "all")]["wape_pct"], "percent", PRED)
-    F("forecast_best_wape_pct", pr[(best, 1, "all")]["wape_pct"], "percent", PRED); F("forecast_best_model", best, "model id", PRED)
+    F("forecast_best_wape_pct", pr[(best, 1, "all")]["wape_pct"], "percent", PRED); F("forecast_best_model", best, "model id", PRED); F("backtest_best_model_label", MODEL_LABELS[best], "text", PRED)
 
     # ------------------------------------------------------------ newsvendor
     CR, SR = 0.60, 0.20
@@ -437,8 +509,9 @@ def run() -> dict:
         f1_ = fc.forecasts(y, 1)[best][0]
         samp = y[-52:]
         sg_ = float(np.std([err[best][s_][i, 0] for i in range(len(origins)) if np.isfinite(err[best][s_][i, 0])], ddof=1))
+        price = round(float(price), 4)
         item_stats[s_] = dict(price=float(price), mu=float(f1_), sigma=sg_, samples=samp)
-        items.append({"id": s_, "label": label, "kind": kind, "price_gbp": round(float(price), 4), "mean_weekly_units": float(samp.mean()), "sd_weekly_units": float(samp.std(ddof=1)),
+        items.append({"id": s_, "label": label, "kind": kind, "price_gbp": float(price), "mean_weekly_units": float(samp.mean()), "sd_weekly_units": float(samp.std(ddof=1)),
                       "forecast_next_week": float(f1_), "weekly_units_sample": [int(v) for v in samp], "weeks": 52, "forecast_sd": sg_})
     cf0 = nv.fractile(1.0, CR, CR * SR)
     assum = [
@@ -448,31 +521,33 @@ def run() -> dict:
         {"id": "lead_time", "label": "Replenishment lead time", "value": 0, "unit": "weeks", "basis": "Assumption. Stock arrives before the week starts; no lead-time demand uncertainty.", "range": [0, 0]},
         {"id": "price", "label": "Selling price", "value": 1.0, "unit": "share of observed price", "basis": "OBSERVED: family average selling price (revenue / units) or SKU median unit price from the ledger.", "range": [1.0, 1.0]}]
     out["newsvendor_params"] = {"schema_version": "v1", "tags": {"assumptions": SIM, "items": "OBSERVED/PREDICTED"}, "labelled": SIM, "assumptions": assum,
-        "formula": {"critical_fractile": "cf = (p - c) / (p - s)", "normal": "Q* = max(0, mu + sigma * Phi^-1(cf)); E[sales] = mu - sigma * (phi(zq) - zq * (1 - Phi(zq))), zq = (Q - mu) / sigma",
+        "formula": {"critical_fractile": "cf = (p - c) / (p - s)", "normal": "Q* = max(0, mu + sigma * Phi^-1(cf)); demand = max(D, 0); L(z) = phi(z) - z (1 - Phi(z)); E[sales] = sigma (L(-mu / sigma) - L(zq)), zq = (Q - mu) / sigma; shortage = sigma L(zq)",
                     "empirical": "Q* = smallest sample d with F(d) >= cf; E[sales] = mean(min(d, Q))", "profit": "profit = p E[sales] - c Q + s (Q - E[sales])"},
         "items": items, "disclaimer": f"SIMULATED. Costs and salvage are assumptions, not data. Demand is OBSERVED (last 52 weeks) and PREDICTED (next-week forecast from {best} with its backtest error as sigma). The output is a what-if, not advice."}
-    # vectors
+    # vectors (DR-7): every item at the default assumptions for both models, plus non-default cases for the first 8 items
     vec = []
-    rng = np.random.default_rng(SEED)
-    for s_ in nv_ids[:12]:
+
+    def addvec(s_, cr_, sr_, model_):
         st = item_stats[s_]
-        for cr_, sr_ in ((0.6, 0.2), (0.4, 0.0), (0.8, 0.5)):
-            p_ = round(st["price"], 4); c_ = round(p_ * cr_, 6); s2 = round(c_ * sr_, 6)
-            if len(vec) < 24:
-                r_ = nv.normal_policy(p_, c_, s2, st["mu"], st["sigma"])
-                vec.append({"case": f"normal_{s_}_{cr_}_{sr_}", "model": "normal", "inputs": {"price": p_, "cost": c_, "salvage": s2, "mu": st["mu"], "sigma": st["sigma"], "samples": None}, "expected": py(r_)})
-            else:
-                r_ = nv.empirical_policy(p_, c_, s2, st["samples"])
-                vec.append({"case": f"empirical_{s_}_{cr_}_{sr_}", "model": "empirical", "inputs": {"price": p_, "cost": c_, "salvage": s2, "mu": None, "sigma": None, "samples": py(st["samples"])}, "expected": py(r_)})
-    for s_ in nv_ids[:10]:
-        st = item_stats[s_]; p_ = round(st["price"], 4)
-        c_ = round(p_ * 0.6, 6); s2 = round(c_ * 0.2, 6)
-        r_ = nv.empirical_policy(p_, c_, s2, st["samples"])
-        vec.append({"case": f"empirical_{s_}_0.6_0.2", "model": "empirical", "inputs": {"price": p_, "cost": c_, "salvage": s2, "mu": None, "sigma": None, "samples": py(st["samples"])}, "expected": py(r_)})
+        p_ = st["price"]; c_ = round(p_ * cr_, 6); s2 = round(c_ * sr_, 6)
+        if model_ == "normal":
+            r_ = nv.normal_policy(p_, c_, s2, st["mu"], st["sigma"])
+            inp = {"price": p_, "cost": c_, "salvage": s2, "mu": st["mu"], "sigma": st["sigma"], "samples": None}
+        else:
+            r_ = nv.empirical_policy(p_, c_, s2, st["samples"])
+            inp = {"price": p_, "cost": c_, "salvage": s2, "mu": None, "sigma": None, "samples": py(st["samples"])}
+        vec.append({"case": f"{model_}_{s_}_c{cr_}_s{sr_}" + ("_default" if (cr_, sr_) == (CR, SR) else ""), "item": s_, "model": model_, "inputs": inp, "expected": py(r_)})
+    for s_ in nv_ids:
+        for m_ in ("normal", "empirical"):
+            addvec(s_, CR, SR, m_)
+    for s_ in nv_ids[:8]:
+        for cr_, sr_ in ((0.4, 0.0), (0.8, 0.4)):
+            for m_ in ("normal", "empirical"):
+                addvec(s_, cr_, sr_, m_)
     # edge cases
-    vec.append({"case": "normal_cf_half", "model": "normal", "inputs": {"price": 10.0, "cost": 5.0, "salvage": 0.0, "mu": 100.0, "sigma": 20.0, "samples": None}, "expected": py(nv.normal_policy(10.0, 5.0, 0.0, 100.0, 20.0))})
-    vec.append({"case": "normal_q_clipped_at_zero", "model": "normal", "inputs": {"price": 10.0, "cost": 9.5, "salvage": 0.0, "mu": 3.0, "sigma": 5.0, "samples": None}, "expected": py(nv.normal_policy(10.0, 9.5, 0.0, 3.0, 5.0))})
-    vec.append({"case": "empirical_small_sample", "model": "empirical", "inputs": {"price": 10.0, "cost": 4.0, "salvage": 1.0, "mu": None, "sigma": None, "samples": [5, 8, 8, 10, 12, 15, 20, 20, 25, 40]}, "expected": py(nv.empirical_policy(10.0, 4.0, 1.0, [5, 8, 8, 10, 12, 15, 20, 20, 25, 40]))})
+    vec.append({"case": "normal_cf_half", "item": "edge", "model": "normal", "inputs": {"price": 10.0, "cost": 5.0, "salvage": 0.0, "mu": 100.0, "sigma": 20.0, "samples": None}, "expected": py(nv.normal_policy(10.0, 5.0, 0.0, 100.0, 20.0))})
+    vec.append({"case": "normal_q_clipped_at_zero", "item": "edge", "model": "normal", "inputs": {"price": 10.0, "cost": 9.5, "salvage": 0.0, "mu": 3.0, "sigma": 5.0, "samples": None}, "expected": py(nv.normal_policy(10.0, 9.5, 0.0, 3.0, 5.0))})
+    vec.append({"case": "empirical_small_sample", "item": "edge", "model": "empirical", "inputs": {"price": 10.0, "cost": 4.0, "salvage": 1.0, "mu": None, "sigma": None, "samples": [5, 8, 8, 10, 12, 15, 20, 20, 25, 40]}, "expected": py(nv.empirical_policy(10.0, 4.0, 1.0, [5, 8, 8, 10, 12, 15, 20, 20, 25, 40]))})
     out["newsvendor_vectors"] = {"schema_version": "v1", "tags": {"vectors": SIM}, "tolerance_rel": 1e-6,
         "note": "Parity vectors for the browser implementation of analytics/newsvendor.py. Compare every expected field with relative tolerance 1e-6 (absolute 1e-9 near zero). The browser needs an inverse normal CDF accurate to about 1e-9 (for example Acklam's rational approximation plus one Halley refinement step using erfc). Empirical Q* is the smallest sample with F(d) >= cf, ties by sorted order.",
         "vectors": vec}
@@ -483,11 +558,13 @@ def run() -> dict:
         st = item_stats[s_]
         for cr_ in grid_c:
             for sr_ in grid_s:
-                p_ = st["price"]; c_ = p_ * cr_; s2 = c_ * sr_
+                p_ = st["price"]; c_ = round(p_ * cr_, 6); s2 = round(c_ * sr_, 6)
                 rn = nv.normal_policy(p_, c_, s2, st["mu"], st["sigma"]); re_ = nv.empirical_policy(p_, c_, s2, st["samples"])
                 mo_ = nv.normal_policy(p_, c_, s2, st["mu"], st["sigma"], q=max(st["mu"], 0.0))
                 scen.append({"item": s_, "cost_ratio": cr_, "salvage_ratio": sr_, "critical_fractile": rn["critical_fractile"], "q_normal": rn["q_star"], "q_empirical": re_["q_star"],
-                             "profit_normal": rn["expected_profit"], "profit_empirical": re_["expected_profit"], "service_level": rn["service_level"], "mean_order_profit": mo_["expected_profit"]})
+                             "profit_normal": rn["expected_profit"], "profit_empirical": re_["expected_profit"], "service_level": rn["service_level"], "mean_order_profit": mo_["expected_profit"],
+                             "expected_sales_normal": rn["expected_sales"], "expected_leftover_normal": rn["expected_leftover"], "expected_shortage_normal": rn["expected_shortage"],
+                             "expected_sales_empirical": re_["expected_sales"], "expected_leftover_empirical": re_["expected_leftover"], "expected_shortage_empirical": re_["expected_shortage"]})
     # policy check (realised profit over the last 26 origins, best-model forecast +/- backtest sigma)
     per = []; tot_nv = tot_mo = 0.0; wk_eval = 0
     z0 = norm.ppf(nv.fractile(1.0, CR, CR * SR))

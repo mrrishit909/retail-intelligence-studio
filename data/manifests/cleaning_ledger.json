@@ -114,7 +114,7 @@
   },
   "guest": {
     "amount_gbp": 2565542.41,
-    "amount_share": 0.13606310227498236,
+    "amount_share": 0.13606310227492166,
     "note": "Rows without Customer ID stay in revenue totals and baskets, and are excluded from RFM, cohorts and CLV.",
     "row_share": 0.22763098285054925,
     "rows": 235151
@@ -129,20 +129,20 @@
       "rhs": 1067371.0
     },
     {
-      "abs_diff": 2.2724270820617676e-07,
+      "abs_diff": 8.188188076019287e-06,
       "description": "raw GBP = kept GBP + excluded GBP",
       "id": "amount_closure",
-      "lhs": 19287250.567997552,
+      "lhs": 19287250.567998026,
       "pass": true,
-      "rhs": 19287250.56799778
+      "rhs": 19287250.568006214
     },
     {
-      "abs_diff": 0.0020022206008434296,
+      "abs_diff": 0.001993786543607712,
       "description": "sum of class amounts = kept GBP",
       "id": "class_amounts",
       "lhs": 18855533.7,
       "pass": true,
-      "rhs": 18855533.69799778
+      "rhs": 18855533.698006213
     },
     {
       "abs_diff": 0.0,
@@ -153,20 +153,20 @@
       "rhs": 1033036.0
     },
     {
-      "abs_diff": 0.007997777312994003,
+      "abs_diff": 0.008006211370229721,
       "description": "sum of monthly revenue = kept GBP",
       "id": "monthly_sum",
       "lhs": 18855533.69,
       "pass": true,
-      "rhs": 18855533.69799778
+      "rhs": 18855533.698006213
     },
     {
-      "abs_diff": 1.4938414096832275e-06,
+      "abs_diff": 1.8142163753509521e-06,
       "description": "known-customer GBP + guest GBP = kept GBP",
       "id": "customer_plus_guest",
-      "lhs": 18855533.697999272,
+      "lhs": 18855533.698008027,
       "pass": true,
-      "rhs": 18855533.69799778
+      "rhs": 18855533.698006213
     },
     {
       "abs_diff": 0.0,
@@ -175,6 +175,14 @@
       "lhs": 467739.0,
       "pass": true,
       "rhs": 467739.0
+    },
+    {
+      "abs_diff": 9.313225746154785e-09,
+      "description": "matched + unmatched refund value = refund value",
+      "id": "refund_value_closure",
+      "lhs": 716425.9699999981,
+      "pass": true,
+      "rhs": 716425.9700000074
     },
     {
       "abs_diff": 0.0,
@@ -312,11 +320,21 @@
     "lines": 17914,
     "matched_lines": 16001,
     "matched_qty": 450259,
+    "matched_value_gbp": 675822.82,
     "matching_rule": "LIFO within customer and SKU against earlier sale lines with unrefunded quantity; residual quantity is unmatched.",
-    "over_refund_lines": 1711,
+    "over_refund_lines": 181,
+    "over_refund_qty": 1757,
+    "over_refund_value_gbp": 4509.66,
+    "refunded_qty": 467739,
+    "sale_units": 11187870,
     "unmatched_no_customer_lines": 328,
-    "unmatched_no_prior_sale_lines": 1711,
+    "unmatched_no_customer_qty": 3447,
+    "unmatched_no_customer_value_gbp": 6472.54,
+    "unmatched_no_prior_sale_lines": 1530,
+    "unmatched_no_prior_sale_qty": 12276,
+    "unmatched_no_prior_sale_value_gbp": 29620.95,
     "unmatched_qty": 17480,
+    "value_basis": "Each part = quantity x the credit-note line's own unit value (amount / quantity); the four parts sum to the refunded value (positive GBP).",
     "value_gbp": -716425.97
   },
   "retrieved_at": "2026-10-11T06:51:45+00:00",

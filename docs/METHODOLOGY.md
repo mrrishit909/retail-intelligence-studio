@@ -64,3 +64,10 @@ Critical fractile (p - c) / (p - s) with assumed cost 0.60 of price and salvage 
 Stage 1 passes (1,311 of 2,753 SKUs with 26+ selling weeks qualify), but Stage 2 fails: 53.8% of log-price variance is inside a single SKU-week and the median within-week Spearman
 correlation of quantity and price is -0.61 (quantity-discount tiers). No elasticity is estimated; the evidence table and the missing data are published. Stage 2 was written after seeing that
 Stage 1 passed on counts (disclosed in `DATA_CONTRACTS.md`).
+
+## 11. Creative-direction data requests (P09-DATA-002)
+- **Hero pair (DR-1):** over all product-SKU pairs, the most baskets in common: 85099B Jumbo Bag Red Retrospot and 22386 Jumbo Bag Pink Polkadot, 4,013 and 2,245 baskets, 1,428 together against 228.0 expected by chance, lift 6.26 (recomputed in the pipeline; it is a colour variant of one product, so `variant_of_same_product` is true).
+- **Showcase (DR-2):** six non-variant rules, 3 by lift then 3 by count, hero excluded, one per itemset. **Active set (DR-3), RFM grids (DR-4), backtest area totals with `e = forecast - actual` (DR-5), CLV overlap and baseline (DR-6):** see DATA_CONTRACTS.md.
+- **Newsvendor (DR-7):** demand is censored at zero; sales = sigma (L(z0) - L(zq)), shortage = sigma L(zq). Every item at the default assumptions is a parity vector for both models (71 vectors in total).
+- **Refund split (DR-8):** matched 450,259 units (GBP 675,823); no earlier sale 12,276 (GBP 29,621); fully refunded already 1,757 (GBP 4,510); no Customer ID 3,447 (GBP 6,473). Parts sum to the refunded 467,739 units and GBP 716,426.
+- **Elasticity (DR-9):** the schema forbids any estimate while `decision.estimable` is false. **Copy facts (DR-10):** R>=4 and F>=4 is 23.6% of customers and 69.3% of net GBP.

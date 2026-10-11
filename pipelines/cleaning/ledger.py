@@ -48,17 +48,28 @@ def run() -> dict:
          "rows_dropped_by_reason": {k: v for k, v in cls.items() if k != "sale"}},
     ]
     r = q("""select count(*), count(distinct invoice_no), sum(amount) from fact_lines where line_class='refund'""")[0]
+    cls_units = {c['class']: c['units'] for c in classes}
+    tot_ref_qty0 = q("select -sum(quantity) from fact_lines where line_class='refund'")[0][0]
     rm = {s: (n, qs) for s, n, qs in q("select status, count(*), coalesce(sum(matched_qty),0) from refund_matches group by 1")}
     # a refund line may be split: matched pieces plus a residual; count distinct lines per status
     lines_matched = q("select count(distinct refund_raw_id) from refund_matches where status='matched'")[0][0]
     nocust = q("select count(distinct refund_raw_id) from refund_matches where status='unmatched_no_customer'")[0][0]
     noprior = q("select count(distinct refund_raw_id) from refund_matches where status='unmatched_no_prior_sale'")[0][0]
+    overl = q("select count(distinct refund_raw_id) from refund_matches where status='unmatched_over_refund'")[0][0]
     unq = q("select coalesce(sum(refund_qty),0) from refund_matches where status like 'unmatched%'")[0][0]
     mq = q("select coalesce(sum(matched_qty),0) from refund_matches")[0][0]
+    # value of each part = quantity x the credit-note line's own unit value (amount / quantity)
+    val = {s: (int(qty), float(v)) for s, qty, v in q("""select m.status, sum(case when m.status='matched' then m.matched_qty else m.refund_qty end),
+        sum((case when m.status='matched' then m.matched_qty else m.refund_qty end) * (f.amount / f.quantity)) from refund_matches m join fact_lines f on f.raw_id = m.refund_raw_id group by 1""")}
+    g = lambda s: val.get(s, (0, 0.0))  # noqa: E731
     refunds = {"lines": r[0], "invoices": r[1], "value_gbp": round(r[2], 2), "matched_lines": lines_matched, "matched_qty": int(mq), "unmatched_qty": int(unq),
                "unmatched_no_customer_lines": nocust, "unmatched_no_prior_sale_lines": noprior,
                "matching_rule": "LIFO within customer and SKU against earlier sale lines with unrefunded quantity; residual quantity is unmatched.",
-               "over_refund_lines": noprior}
+               "over_refund_lines": overl, "sale_units": int(cls_units["sale"]), "refunded_qty": int(tot_ref_qty0),
+               "matched_value_gbp": round(g("matched")[1], 2), "unmatched_no_prior_sale_qty": g("unmatched_no_prior_sale")[0], "unmatched_no_prior_sale_value_gbp": round(g("unmatched_no_prior_sale")[1], 2),
+               "unmatched_no_customer_qty": g("unmatched_no_customer")[0], "unmatched_no_customer_value_gbp": round(g("unmatched_no_customer")[1], 2),
+               "over_refund_qty": g("unmatched_over_refund")[0], "over_refund_value_gbp": round(g("unmatched_over_refund")[1], 2),
+               "value_basis": "Each part = quantity x the credit-note line's own unit value (amount / quantity); the four parts sum to the refunded value (positive GBP)."}
     monthly = [{"month": m, "amount_gbp": round(a, 2)} for m, a in q("select month, sum(amount) from fact_lines group by 1 order by 1")]
     tot_ref_qty = q("select -sum(quantity) from fact_lines where line_class='refund'")[0][0]
     ids = []
@@ -72,6 +83,7 @@ def run() -> dict:
     idn("monthly_sum", "sum of monthly revenue = kept GBP", sum(m["amount_gbp"] for m in monthly), kept_amt, 0.5)
     idn("customer_plus_guest", "known-customer GBP + guest GBP = kept GBP", q("select sum(amount) from fact_lines where not is_guest")[0][0] + g_amt, kept_amt)
     idn("refund_qty_closure", "matched + unmatched refund quantity = refunded quantity", mq + unq, tot_ref_qty, 0)
+    idn("refund_value_closure", "matched + unmatched refund value = refund value", sum(v for _, v in val.values()), -r[2], 0.05)
     idn("sheet_rows", "sheet rows sum to UCI instance count", sum(s["rows"] for s in ex["sheets"]), 1067371, 0)
     idn("overlap_identical_copy", "overlap rows excluded = rows of sheet 2 in the overlap window", exc["overlap_duplicate"][0],
         q("select count(*) from stg_raw where sheet='Year 2010-2011' and invoice_ts < timestamp '2010-12-10'")[0][0], 0)

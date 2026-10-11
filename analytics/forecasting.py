@@ -123,6 +123,8 @@ def pooled(ser, err, origins, ids, h):
                 sc = np.abs(np.diff(y[:o + 1])).mean()
                 mase_terms.append(abs(x) / sc if sc > 0 else np.nan)
         ae, act, bias = np.concatenate(ae), np.concatenate(act), np.concatenate(bias)
-        out[m] = {"mae": float(ae.mean()), "wape_pct": float(100 * ae.sum() / act.sum()), "mase": float(np.nanmean(mase_terms)),
+        fcst = act + bias  # e = forecast - actual
+        out[m] = {"actual_total": float(act.sum()), "forecast_total": float(fcst.sum()), "over_total": float(np.maximum(bias, 0).sum()),
+                  "under_total": float(np.maximum(-bias, 0).sum()), "mae": float(ae.mean()), "wape_pct": float(100 * ae.sum() / act.sum()), "mase": float(np.nanmean(mase_terms)),
                   "bias_pct": float(100 * bias.sum() / act.sum()), "n": int(len(ae))}
     return out

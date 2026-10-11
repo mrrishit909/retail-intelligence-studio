@@ -157,3 +157,132 @@ def test_baskets_thresholds(art):
     for r in b["rules"]:
         assert r["support"] >= p["min_support"] - 1e-12 and r["confidence"] >= p["min_confidence"] - 1e-12 and r["lift"] > 1
         assert r["count"] >= p["support_count_min"]
+
+
+# ---------- P09-DATA-002 data requests ----------
+@pytest.mark.slow
+def test_dr1_hero_pair_facts_match_baskets(art):
+    f, b = art("facts")["facts"], art("baskets")
+    h = b["hero"]
+    assert f["hero_pair_a"]["value"] == h["a"] and f["hero_pair_nab"]["value"] == h["nab"]
+    assert f["hero_pair_chance"]["value"] == pytest.approx(h["na"] * h["nb"] / f["basket_count"]["value"])
+    assert f["hero_pair_lift"]["value"] == pytest.approx(h["nab"] * f["basket_count"]["value"] / (h["na"] * h["nb"]))
+    assert h["na"] >= h["nb"] and h["nab"] >= max(r["nab"] for r in h["runner_up"])
+    assert any(e["hero"] and {e["a"], e["b"]} == {h["a"], h["b"]} for e in b["edges"])
+
+
+@pytest.mark.slow
+def test_dr2_showcase(art):
+    b = art("baskets")
+    s = b["showcase"]
+    assert len(s["indices"]) == 6 and s["kinds"] == ["lift"] * 3 + ["count"] * 3
+    sets = [frozenset(b["rules"][i]["antecedent"] + b["rules"][i]["consequent"]) for i in s["indices"]]
+    assert len(set(sets)) == 6 and frozenset((b["hero"]["a"], b["hero"]["b"])) not in sets
+    assert not any(b["rules"][i]["variant_of_same_product"] for i in s["indices"])
+    lifts = [b["rules"][i]["lift"] for i in s["indices"][:3]]
+    assert lifts == sorted(lifts, reverse=True)
+
+
+@pytest.mark.slow
+def test_dr3_cohort_active_set_matches_overview(art):
+    c, o = art("cohorts"), art("overview")
+    for m, n in zip(c["cohort_months"], c["active_customers"]):
+        assert o["series"]["active_customers"][o["months"].index(m)] == n
+    assert all(a >= b for a, b in zip(c["active_net_revenue_gbp"], [0] * len(c["cohort_months"])))
+    # a cohort can never be bigger than the active set in its own month
+    assert all(s <= a for s, a in zip(c["sizes"], c["active_customers"]))
+
+
+@pytest.mark.slow
+def test_dr4_rfm_grids(art):
+    r = art("rfm")
+    n = r["included"]["customers"]
+    for k in ("r_by_f", "r_by_m", "f_by_m"):
+        assert sum(map(sum, r["grid"][k + "_customers"])) == n
+        assert sum(map(sum, r["grid"][k + "_revenue_gbp"])) == pytest.approx(sum(r["customers"]["monetary_gbp"]), abs=30)
+    # marginals agree across pairs: row sums of R x F equal row sums of R x M
+    assert [sum(x) for x in r["grid"]["r_by_f_customers"]] == [sum(x) for x in r["grid"]["r_by_m_customers"]]
+    assert [sum(x) for x in zip(*r["grid"]["r_by_f_customers"])] == [sum(x) for x in r["grid"]["f_by_m_customers"]]
+
+
+@pytest.mark.slow
+def test_dr5_backtest_area_identities(art):
+    b = art("backtest")
+    assert "forecast - actual" in b["design"]["error_sign"]
+    for r in b["pooled"]:
+        assert (r["over_total"] + r["under_total"]) / r["actual_total"] * 100 == pytest.approx(r["wape_pct"], rel=1e-9)
+        assert r["forecast_total"] - r["actual_total"] == pytest.approx(r["over_total"] - r["under_total"], rel=1e-9, abs=1e-6)
+        assert r["bias_pct"] == pytest.approx(100 * (r["forecast_total"] - r["actual_total"]) / r["actual_total"], rel=1e-9, abs=1e-9)
+        assert r["mae"] * r["n"] == pytest.approx(r["over_total"] + r["under_total"], rel=1e-9)
+
+
+@pytest.mark.slow
+def test_dr6_clv_overlap_and_baseline(art):
+    c = art("clv")
+    h = c["holdout"]
+    assert 0 < h["overlap_customer_sum"] <= min(h["predicted_repeats_total"], h["actual_repeats_total"])
+    assert h["baseline_overlap_customer_sum"] < h["overlap_customer_sum"]
+    assert sum(d["predicted_sum"] for d in c["deciles"]) == pytest.approx(h["predicted_repeats_total"])
+    assert sum(d["baseline_predicted_sum"] for d in c["deciles"]) == pytest.approx(h["baseline_predicted_total"])
+    assert sum(d["overlap_sum"] for d in c["deciles"]) <= h["overlap_customer_sum"] + 1e-6  # decile-level min can only be larger-grained: <=
+
+
+@pytest.mark.slow
+def test_dr7_scenarios_match_vectors_at_defaults(art):
+    v, s, p = art("newsvendor_vectors")["vectors"], art("newsvendor_scenarios")["scenarios"], art("newsvendor_params")
+    ids = {i["id"] for i in p["items"]}
+    for model in ("normal", "empirical"):
+        assert {c["item"] for c in v if c["model"] == model and c["case"].endswith("_default")} == ids
+    for c in v:
+        if not c["case"].endswith("_default"):
+            continue
+        row = next(r for r in s if r["item"] == c["item"] and r["cost_ratio"] == 0.6 and r["salvage_ratio"] == 0.2)
+        m = c["model"]
+        for k in ("sales", "leftover", "shortage"):
+            assert row[f"expected_{k}_{m}"] == pytest.approx(c["expected"][f"expected_{k}"], rel=1e-9, abs=1e-9)
+        assert row[f"profit_{m}"] == pytest.approx(c["expected"]["expected_profit"], rel=1e-9)
+    for r in s:
+        assert r["expected_sales_normal"] >= 0 and r["expected_leftover_normal"] >= -1e-9 and r["expected_shortage_normal"] >= -1e-9
+        assert r["expected_sales_empirical"] >= 0 and r["expected_shortage_empirical"] >= -1e-9
+
+
+@pytest.mark.slow
+def test_dr8_refund_split(art):
+    r = art("reconciliation")["refunds"]
+    assert r["matched_qty"] + r["unmatched_no_prior_sale_qty"] + r["unmatched_no_customer_qty"] + r["over_refund_qty"] == r["refunded_qty"]
+    parts = r["matched_value_gbp"] + r["unmatched_no_prior_sale_value_gbp"] + r["unmatched_no_customer_value_gbp"] + r["over_refund_value_gbp"]
+    assert parts == pytest.approx(-r["value_gbp"], abs=0.05)
+    assert r["sale_units"] == next(c for c in art("reconciliation")["classes"] if c["class"] == "sale")["units"]
+
+
+def test_dr9_elasticity_schema_blocks_numbers_when_not_estimable():
+    import json
+    import copy
+    from jsonschema import Draft202012Validator
+    from pipelines.common import CONTRACTS, PUBLIC
+    v = Draft202012Validator(json.loads((CONTRACTS / "elasticity.schema.json").read_text()))
+    doc = json.loads((PUBLIC / "elasticity.json").read_text())
+    assert not list(v.iter_errors(doc))
+    bad = copy.deepcopy(doc)
+    bad["estimates"] = {"method": "x", "skus": [], "pooled": {"elasticity": -1.2, "ci_lo": -1.5, "ci_hi": -0.9}}
+    assert list(v.iter_errors(bad))  # a number is rejected in the not-estimable state
+    ok = copy.deepcopy(bad)
+    ok["decision"]["estimable"] = True
+    ok["decision"]["criteria"] = [dict(c, **{"pass": True}) for c in ok["decision"]["criteria"]]
+    assert not list(v.iter_errors(ok))  # the estimable state accepts the typed shape
+    ok["estimates"] = None
+    assert list(v.iter_errors(ok))  # and requires it
+
+
+@pytest.mark.slow
+def test_dr10_copy_facts(art):
+    f = art("facts")["facts"]
+    r = art("rfm")
+    n = r["included"]["customers"]
+    m = sum(1 for a, b in zip(r["customers"]["r"], r["customers"]["f"]) if a >= 4 and b >= 4)
+    assert f["rfm_rf_share_customers"]["value"] == pytest.approx(m / n)
+    mon = r["customers"]["monetary_gbp"]
+    rev = sum(x for x, a, b in zip(mon, r["customers"]["r"], r["customers"]["f"]) if a >= 4 and b >= 4) / sum(mon)
+    assert f["rfm_rf_share_revenue"]["value"] == pytest.approx(rev, abs=2e-4)
+    b = art("backtest")
+    assert f["backtest_best_model_label"]["value"] == next(x["label"] for x in b["models"] if x["id"] == f["forecast_best_model"]["value"])

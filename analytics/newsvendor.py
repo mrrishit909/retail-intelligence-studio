@@ -2,7 +2,8 @@
 
 Single period, price p, unit cost c, salvage s (s < c < p). Critical fractile cf = (p - c) / (p - s). Underage cu = p - c, overage co = c - s.
 Normal demand N(mu, sigma): z = Phi^-1(cf); Q* = max(0, mu + sigma z); zq = (Q - mu) / sigma;
-  E[sales] = mu - sigma * (phi(zq) - zq * (1 - Phi(zq)))   (demand truncation at 0 ignored; documented)
+  With L(z) = phi(z) - z (1 - Phi(z)) and demand censored at zero (negative draws count as 0): z0 = -mu / sigma,
+  E[sales] = sigma (L(z0) - L(zq)); shortage = sigma L(zq); a clipped Q* = 0 gives sales = leftover = profit = 0.
   leftover = Q - E[sales]; shortage = mu - E[sales]; profit = p E[sales] - c Q + s leftover; service level = Phi(zq).
 Empirical demand (samples d_i): Q* = smallest sample with F(Q) >= cf; E[sales] = mean(min(d, Q)); service level = F(Q).
 """
@@ -23,10 +24,12 @@ def normal_policy(p, c, s, mu, sigma, q=None):
     cf = fractile(p, c, s)
     Q = max(0.0, mu + sigma * norm.ppf(cf)) if q is None else q
     zq = (Q - mu) / sigma
-    es = mu - sigma * (norm.pdf(zq) - zq * (1 - norm.cdf(zq)))
+    L = lambda z: norm.pdf(z) - z * (1 - norm.cdf(z))  # noqa: E731  unit normal loss function
+    z0 = -mu / sigma
+    es = sigma * (L(z0) - L(zq))  # demand is max(D, 0): negative draws count as zero demand
     left = Q - es
     return {"critical_fractile": cf, "q_star": Q, "expected_profit": p * es - c * Q + s * left, "expected_sales": es, "expected_leftover": left,
-            "expected_shortage": mu - es, "service_level": float(norm.cdf(zq))}
+            "expected_shortage": sigma * L(zq), "service_level": float(norm.cdf(zq))}
 
 
 def empirical_policy(p, c, s, samples, q=None):

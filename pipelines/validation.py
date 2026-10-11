@@ -50,6 +50,28 @@ def run(out: dict) -> dict:
         if abs(lift - r["lift"]) > 1e-9 or nac != r["count"]:
             bad += 1
     C.append(chk("basket_recount", "baskets", "Top 15 published rules recomputed from raw baskets (count and lift)", 0, bad, bad == 0))
+    # DR-1: recompute the hero pair independently (brute force over all product-SKU pairs from the raw invoice x SKU sets)
+    import collections
+    cnt1 = collections.Counter(); cnt2 = collections.Counter()
+    for x_ in sets:
+        cnt1.update(x_)
+        xs = sorted(x_)
+        if len(xs) <= 60:
+            cnt2.update((xs[i], xs[j]) for i in range(len(xs)) for j in range(i + 1, len(xs)))
+        else:
+            pass
+    hero = out["baskets"]["hero"]
+    exact = sum(1 for x_ in sets if hero["a"] in x_ and hero["b"] in x_)
+    C.append(chk("hero_pair_recount", "baskets", "Hero pair counts (na, nb, nab) recomputed from raw baskets", f"{hero['na']}/{hero['nb']}/{hero['nab']}",
+                 f"{cnt1[hero['a']]}/{cnt1[hero['b']]}/{exact}", cnt1[hero["a"]] == hero["na"] and cnt1[hero["b"]] == hero["nb"] and exact == hero["nab"]))
+    C.append(chk("hero_pair_max", "baskets", "No SKU pair in baskets of up to 60 SKUs has more baskets in common than the hero pair (exact, small baskets)", f"<= {hero['nab']}",
+                 max(cnt2.values()), max(cnt2.values()) <= hero["nab"]))
+    C.append(chk("hero_pair_lift", "baskets", "Hero lift = nab * baskets / (na * nb)", round(hero["lift"], 9), round(hero["nab"] * nb / (hero["na"] * hero["nb"]), 9),
+                 abs(hero["lift"] - hero["nab"] * nb / (hero["na"] * hero["nb"])) < 1e-9))
+    sc = out["baskets"]["showcase"]
+    C.append(chk("showcase_rules", "baskets", "Showcase: 6 distinct itemsets, none a variant, hero pair excluded", 6, len({frozenset(s) for s in sc["itemsets"]}),
+                 len({frozenset(s) for s in sc["itemsets"]}) == 6 and not any(out["baskets"]["rules"][i]["variant_of_same_product"] for i in sc["indices"])
+                 and all(frozenset(s) != frozenset((hero["a"], hero["b"])) for s in sc["itemsets"])))
     C.append(chk("basket_baskets", "baskets", "Basket count = distinct invoices with a sale line", nb, bs["params"]["baskets"], nb == bs["params"]["baskets"]))
     C.append(chk("basket_min_support", "baskets", "Every published rule meets the minimum support", bs["params"]["min_support"], min(r["support"] for r in bs["rules"]), min(r["support"] for r in bs["rules"]) >= bs["params"]["min_support"] - 1e-12))
     cv = out["clv"]
@@ -69,6 +91,22 @@ def run(out: dict) -> dict:
     C.append(chk("clv_beats_baseline", "clv", "BG/NBD per-customer MAE below the population-rate baseline", H["baseline_mae_customer"], H["mae_customer"], H["mae_customer"] < H["baseline_mae_customer"]))
     C.append(chk("clv_deciles_ordered", "clv", "Predicted decile means increase with decile", True, True, all(cv["deciles"][i]["predicted"] <= cv["deciles"][i + 1]["predicted"] + 1e-12 for i in range(9))))
     bt = out["backtest"]
+    bad_ = [r for r in bt["pooled"] if abs((r["over_total"] + r["under_total"]) / r["actual_total"] * 100 - r["wape_pct"]) > 1e-6 or abs(r["forecast_total"] - r["actual_total"] - (r["over_total"] - r["under_total"])) > 1e-6 * r["actual_total"]]
+    C.append(chk("bt_area_identities", "forecast", "Pooled rows: WAPE = (over + under) / actual and forecast - actual = over - under", 0, len(bad_), not bad_))
+    ra = out["reconciliation"]["refunds"]
+    parts = ra["matched_qty"] + ra["unmatched_no_prior_sale_qty"] + ra["unmatched_no_customer_qty"] + ra["over_refund_qty"]
+    C.append(chk("refund_split_qty", "reconciliation", "Refund parts (matched, no prior sale, over-refund, no customer) sum to refunded quantity", ra["refunded_qty"], parts, parts == ra["refunded_qty"]))
+    vparts = ra["matched_value_gbp"] + ra["unmatched_no_prior_sale_value_gbp"] + ra["unmatched_no_customer_value_gbp"] + ra["over_refund_value_gbp"]
+    C.append(chk("refund_split_value", "reconciliation", "Refund parts sum to the refunded GBP", round(-ra["value_gbp"], 2), round(vparts, 2), abs(vparts + ra["value_gbp"]) < 0.05))
+    co = out["cohorts"]
+    C.append(chk("cohort_active_aligned", "cohorts", "Active-set arrays are aligned to cohort_months and active customers equal overview", len(co["cohort_months"]), len(co["active_customers"]),
+                 len(co["active_customers"]) == len(co["cohort_months"]) == len(co["active_revenue_gbp"]) and all(out["overview"]["series"]["active_customers"][out["overview"]["months"].index(m)] == n for m, n in zip(co["cohort_months"], co["active_customers"]))))
+    g_ = out["rfm"]["grid"]
+    C.append(chk("rfm_grids_totals", "rfm", "All three customer grids sum to the included customers", out["rfm"]["included"]["customers"], [sum(map(sum, g_[k])) for k in ("r_by_f_customers", "r_by_m_customers", "f_by_m_customers")],
+                 all(sum(map(sum, g_[k])) == out["rfm"]["included"]["customers"] for k in ("r_by_f_customers", "r_by_m_customers", "f_by_m_customers"))))
+    hl = out["clv"]["holdout"]
+    C.append(chk("clv_overlap_le_min_totals", "clv", "Customer-level overlap does not exceed min(predicted total, actual total) and baseline overlap totals are consistent", "<= min totals",
+                 round(hl["overlap_customer_sum"], 1), hl["overlap_customer_sum"] <= min(hl["predicted_repeats_total"], hl["actual_repeats_total"]) + 1e-6 and hl["baseline_overlap_customer_sum"] <= min(hl["baseline_predicted_total"], hl["actual_repeats_total"]) + 1e-6))
     C.append(chk("bt_baseline_present", "forecast", "Seasonal-naive baseline evaluated on every series and horizon", bt["design"]["series"], len({r["scope"] for r in bt["pooled"]}), any(r["model"] == "snaive" for r in bt["pooled"])))
     C.append(chk("bt_origins", "forecast", "At least 40 rolling origins", ">= 40", bt["design"]["origins"], bt["design"]["origins"] >= 40))
     cov = bt["interval_coverage"]["empirical"]
