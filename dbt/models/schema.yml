@@ -1,0 +1,38 @@
+version: 2
+models:
+  - name: stg_lines
+    columns:
+      - name: raw_id
+        tests: [unique, not_null]
+      - name: line_class
+        tests: [{accepted_values: {values: [sale, refund, stock_adjustment, nonproduct]}}]
+      - name: exclusion_reason
+        tests: [{accepted_values: {values: [overlap_duplicate, exact_duplicate]}}]
+  - name: fact_lines
+    columns:
+      - name: raw_id
+        tests: [unique, not_null]
+      - name: product_key
+        tests: [{relationships: {to: ref('dim_product'), field: product_key}}]
+      - name: date_key
+        tests: [{relationships: {to: ref('dim_date'), field: date_key}}]
+      - name: country_key
+        tests: [{relationships: {to: ref('dim_country'), field: country_key}}]
+      - name: customer_key
+        tests: [{relationships: {to: ref('dim_customer'), field: customer_key}}]
+  - name: dim_product
+    columns:
+      - name: sku
+        tests: [unique, not_null]
+  - name: dim_customer
+    columns:
+      - name: customer_key
+        tests: [unique, not_null]
+  - name: dim_date
+    columns:
+      - name: date_key
+        tests: [unique, not_null]
+  - name: dim_country
+    columns:
+      - name: country
+        tests: [unique, not_null]

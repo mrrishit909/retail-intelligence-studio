@@ -1,0 +1,16 @@
+name: retail_studio
+version: "1.0.0"
+config-version: 2
+profile: retail_studio
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+target-path: "../data/processed/dbt_target"
+log-path: "../data/processed/dbt_logs"
+models:
+  retail_studio:
+    staging: {+materialized: table}
+    marts: {+materialized: table}
+seeds:
+  retail_studio:
+    product_family_rules: {+column_types: {priority: integer}}

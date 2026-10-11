@@ -84,7 +84,7 @@ SCHEMAS = {
         "sheets": arr(obj({"sheet": S, "rows": I, "first_ts": S, "last_ts": S}), 2),
         "row_ledger": obj({"raw_rows": I, "kept": I, "excluded": I, "excluded_by_reason": OBJ, "identity": S}),
         "amount_ledger": obj({"raw_amount_gbp": N, "kept_amount_gbp": N, "excluded_amount_gbp": N, "excluded_by_reason_gbp": OBJ, "identity": S}),
-        "classes": arr(obj({"class": S, "rows": I, "amount_gbp": N, "units": I, "treatment": S}), lo=5),
+        "classes": arr(obj({"class": S, "rows": I, "amount_gbp": N, "units": I, "treatment": S}), lo=4),
         "analytics_scopes": arr(obj({"analysis": S, "rule": S, "rows_in": I, "rows_out": I, "rows_dropped_by_reason": OBJ}), lo=5),
         "guest": obj({"rows": I, "row_share": N, "amount_gbp": N, "amount_share": N, "note": S}),
         "refunds": obj({"lines": I, "invoices": I, "value_gbp": N, "matched_lines": I, "matched_qty": I, "unmatched_qty": I, "unmatched_no_customer_lines": I,
@@ -98,7 +98,7 @@ SCHEMAS = {
         "countries": arr(obj({"country": S, "net_gbp": N, "share": N, "invoices": I, "customers": I}), lo=5),
         "country_other": obj({"countries": I, "net_gbp": N, "share": N}),
         "rhythm": obj({"weekday": arr(S, 7), "hour": arr(I), "sales_gbp": arr(arr(N)), "lines": arr(arr(I))}),
-        "basket": obj({"lines_per_invoice_quantiles": arr(N), "invoice_value_quantiles": arr(N), "quantiles": arr(N)})}),
+        "basket": obj({"quantile_levels": arr(N), "lines_per_invoice": arr(N), "invoice_value_gbp": arr(N)})}),
     "products": top("products", {
         "family_rule": S, "family_coverage_revenue_share": N, "family_coverage_sku_share": N,
         "families": arr(obj({"family": S, "keywords": arr(S), "skus": I, "revenue_gbp": N, "units": I, "share": N, "customers": I}), lo=10),

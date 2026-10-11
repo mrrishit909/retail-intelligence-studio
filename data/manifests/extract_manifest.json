@@ -1,0 +1,25 @@
+{
+  "schema_version": "v1",
+  "sheet_names": [
+    "Year 2009-2010",
+    "Year 2010-2011"
+  ],
+  "sheets": [
+    {
+      "first_ts": "2009-12-01 07:45:00",
+      "last_ts": "2010-12-09 20:01:00",
+      "rows": 525461,
+      "sheet": "Year 2009-2010"
+    },
+    {
+      "first_ts": "2010-12-01 08:26:00",
+      "last_ts": "2011-12-09 12:50:00",
+      "rows": 541910,
+      "sheet": "Year 2010-2011"
+    }
+  ],
+  "tags": {
+    "sheets": "OBSERVED"
+  },
+  "total_rows": 1067371
+}

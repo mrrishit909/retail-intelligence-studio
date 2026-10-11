@@ -91,7 +91,7 @@
     ],
     "type": "object"
    },
-   "minItems": 5,
+   "minItems": 4,
    "type": "array"
   },
   "guest": {

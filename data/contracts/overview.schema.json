@@ -5,19 +5,19 @@
   "basket": {
    "additionalProperties": true,
    "properties": {
-    "invoice_value_quantiles": {
+    "invoice_value_gbp": {
      "items": {
       "type": "number"
      },
      "type": "array"
     },
-    "lines_per_invoice_quantiles": {
+    "lines_per_invoice": {
      "items": {
       "type": "number"
      },
      "type": "array"
     },
-    "quantiles": {
+    "quantile_levels": {
      "items": {
       "type": "number"
      },
@@ -25,9 +25,9 @@
     }
    },
    "required": [
-    "lines_per_invoice_quantiles",
-    "invoice_value_quantiles",
-    "quantiles"
+    "quantile_levels",
+    "lines_per_invoice",
+    "invoice_value_gbp"
    ],
    "type": "object"
   },
