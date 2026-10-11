@@ -1,0 +1,235 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "caveat": {
+   "type": "string"
+  },
+  "edges": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "a": {
+      "type": "string"
+     },
+     "b": {
+      "type": "string"
+     },
+     "count": {
+      "type": "integer"
+     },
+     "lift": {
+      "type": "number"
+     },
+     "same_family": {
+      "type": "boolean"
+     },
+     "support": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "a",
+     "b",
+     "support",
+     "lift",
+     "count",
+     "same_family"
+    ],
+    "type": "object"
+   },
+   "minItems": 20,
+   "type": "array"
+  },
+  "nodes": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "baskets": {
+      "type": "integer"
+     },
+     "degree": {
+      "type": "integer"
+     },
+     "description": {
+      "type": "string"
+     },
+     "family": {
+      "type": "string"
+     },
+     "sku": {
+      "type": "string"
+     },
+     "support": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "sku",
+     "description",
+     "family",
+     "support",
+     "baskets",
+     "degree"
+    ],
+    "type": "object"
+   },
+   "minItems": 20,
+   "type": "array"
+  },
+  "params": {
+   "additionalProperties": true,
+   "properties": {
+    "basket_definition": {
+     "type": "string"
+    },
+    "baskets": {
+     "type": "integer"
+    },
+    "frequent_items": {
+     "type": "integer"
+    },
+    "frequent_itemsets": {
+     "type": "integer"
+    },
+    "item_definition": {
+     "type": "string"
+    },
+    "max_len": {
+     "type": "integer"
+    },
+    "min_confidence": {
+     "type": "number"
+    },
+    "min_lift": {
+     "type": "number"
+    },
+    "min_support": {
+     "type": "number"
+    },
+    "support_count_min": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "min_support",
+    "min_confidence",
+    "min_lift",
+    "max_len",
+    "baskets",
+    "frequent_items",
+    "frequent_itemsets",
+    "basket_definition",
+    "item_definition",
+    "support_count_min"
+   ],
+   "type": "object"
+  },
+  "rules": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "antecedent": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "antecedent_desc": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "confidence": {
+      "type": "number"
+     },
+     "consequent": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "consequent_desc": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "conviction": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "count": {
+      "type": "integer"
+     },
+     "families": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "leverage": {
+      "type": "number"
+     },
+     "lift": {
+      "type": "number"
+     },
+     "same_family": {
+      "type": "boolean"
+     },
+     "support": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "antecedent",
+     "consequent",
+     "antecedent_desc",
+     "consequent_desc",
+     "support",
+     "confidence",
+     "lift",
+     "leverage",
+     "conviction",
+     "count",
+     "same_family",
+     "families"
+    ],
+    "type": "object"
+   },
+   "minItems": 20,
+   "type": "array"
+  },
+  "rules_total": {
+   "type": "integer"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "params",
+  "rules_total",
+  "rules",
+  "nodes",
+  "edges",
+  "caveat"
+ ],
+ "title": "baskets",
+ "type": "object"
+}

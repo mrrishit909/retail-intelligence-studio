@@ -1,0 +1,462 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "by_frequency": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "actual": {
+      "type": "number"
+     },
+     "customers": {
+      "type": "integer"
+     },
+     "predicted": {
+      "type": "number"
+     },
+     "repeats_in_calibration": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "repeats_in_calibration",
+     "customers",
+     "predicted",
+     "actual"
+    ],
+    "type": "object"
+   },
+   "minItems": 4,
+   "type": "array"
+  },
+  "by_segment": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "clv_mean_gbp": {
+      "type": "number"
+     },
+     "clv_total_gbp": {
+      "type": "number"
+     },
+     "customers": {
+      "type": "integer"
+     },
+     "expected_purchases_mean": {
+      "type": "number"
+     },
+     "p_alive_mean": {
+      "type": "number"
+     },
+     "segment": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "segment",
+     "customers",
+     "clv_mean_gbp",
+     "clv_total_gbp",
+     "p_alive_mean",
+     "expected_purchases_mean"
+    ],
+    "type": "object"
+   },
+   "minItems": 6,
+   "type": "array"
+  },
+  "calibration": {
+   "additionalProperties": true,
+   "properties": {
+    "customers": {
+     "type": "integer"
+    },
+    "customers_active_in_holdout": {
+     "type": "integer"
+    },
+    "customers_repeat_in_calibration": {
+     "type": "integer"
+    },
+    "end": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "holdout_end": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "holdout_start": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "holdout_weeks": {
+     "type": "number"
+    },
+    "start": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "start",
+    "end",
+    "holdout_start",
+    "holdout_end",
+    "holdout_weeks",
+    "customers",
+    "customers_repeat_in_calibration",
+    "customers_active_in_holdout"
+   ],
+   "type": "object"
+  },
+  "customers": {
+   "additionalProperties": true,
+   "properties": {
+    "age_weeks": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "clv_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "expected_purchases": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "expected_value_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "frequency": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "key": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "monetary_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "p_alive": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "recency_weeks": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "key",
+    "frequency",
+    "recency_weeks",
+    "age_weeks",
+    "monetary_gbp",
+    "p_alive",
+    "expected_purchases",
+    "expected_value_gbp",
+    "clv_gbp"
+   ],
+   "type": "object"
+  },
+  "deciles": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "actual": {
+      "type": "number"
+     },
+     "customers": {
+      "type": "integer"
+     },
+     "decile": {
+      "type": "integer"
+     },
+     "error_pct": {
+      "type": "number"
+     },
+     "predicted": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "decile",
+     "customers",
+     "predicted",
+     "actual",
+     "error_pct"
+    ],
+    "type": "object"
+   },
+   "maxItems": 10,
+   "minItems": 10,
+   "type": "array"
+  },
+  "final_fit": {
+   "additionalProperties": true,
+   "properties": {
+    "clv_median_gbp": {
+     "type": "number"
+    },
+    "clv_quantiles": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "clv_total_gbp": {
+     "type": "number"
+    },
+    "customers": {
+     "type": "integer"
+    },
+    "discount_rate_annual": {
+     "type": "number"
+    },
+    "fit_end": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "fit_start": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "horizon_weeks": {
+     "type": "integer"
+    },
+    "quantile_levels": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "top_decile_share": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "fit_start",
+    "fit_end",
+    "horizon_weeks",
+    "discount_rate_annual",
+    "customers",
+    "clv_total_gbp",
+    "clv_median_gbp",
+    "top_decile_share",
+    "clv_quantiles",
+    "quantile_levels"
+   ],
+   "type": "object"
+  },
+  "gamma_gamma_check": {
+   "additionalProperties": true,
+   "properties": {
+    "corr_frequency_monetary": {
+     "type": "number"
+    },
+    "customers": {
+     "type": "integer"
+    },
+    "note": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "corr_frequency_monetary",
+    "customers",
+    "note"
+   ],
+   "type": "object"
+  },
+  "holdout": {
+   "additionalProperties": true,
+   "properties": {
+    "actual_repeats_total": {
+     "type": "integer"
+    },
+    "baseline": {
+     "type": "string"
+    },
+    "baseline_mae_customer": {
+     "type": "number"
+    },
+    "corr_customer": {
+     "type": "number"
+    },
+    "mae_customer": {
+     "type": "number"
+    },
+    "mape_decile_pct": {
+     "type": "number"
+    },
+    "predicted_repeats_total": {
+     "type": "number"
+    },
+    "rank_corr_customer": {
+     "type": "number"
+    },
+    "total_error_pct": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "predicted_repeats_total",
+    "actual_repeats_total",
+    "total_error_pct",
+    "mae_customer",
+    "baseline_mae_customer",
+    "corr_customer",
+    "rank_corr_customer",
+    "baseline",
+    "mape_decile_pct"
+   ],
+   "type": "object"
+  },
+  "limitations": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 3,
+   "type": "array"
+  },
+  "model": {
+   "additionalProperties": true,
+   "properties": {
+    "bgnbd": {
+     "additionalProperties": true,
+     "properties": {
+      "a": {
+       "type": "number"
+      },
+      "alpha": {
+       "type": "number"
+      },
+      "b": {
+       "type": "number"
+      },
+      "converged": {
+       "type": "boolean"
+      },
+      "loglik": {
+       "type": "number"
+      },
+      "n_customers": {
+       "type": "integer"
+      },
+      "r": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "r",
+      "alpha",
+      "a",
+      "b",
+      "loglik",
+      "converged",
+      "n_customers"
+     ],
+     "type": "object"
+    },
+    "gamma_gamma": {
+     "additionalProperties": true,
+     "properties": {
+      "converged": {
+       "type": "boolean"
+      },
+      "loglik": {
+       "type": "number"
+      },
+      "n_customers": {
+       "type": "integer"
+      },
+      "p": {
+       "type": "number"
+      },
+      "q": {
+       "type": "number"
+      },
+      "v": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "p",
+      "q",
+      "v",
+      "loglik",
+      "converged",
+      "n_customers"
+     ],
+     "type": "object"
+    },
+    "implementation": {
+     "type": "string"
+    },
+    "time_unit": {
+     "type": "string"
+    },
+    "transaction_definition": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "bgnbd",
+    "gamma_gamma",
+    "implementation",
+    "transaction_definition",
+    "time_unit"
+   ],
+   "type": "object"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "model",
+  "calibration",
+  "holdout",
+  "deciles",
+  "by_frequency",
+  "gamma_gamma_check",
+  "final_fit",
+  "by_segment",
+  "customers",
+  "limitations"
+ ],
+ "title": "clv",
+ "type": "object"
+}

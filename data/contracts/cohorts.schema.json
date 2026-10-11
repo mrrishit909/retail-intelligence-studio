@@ -1,0 +1,139 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "cohort_months": {
+   "items": {
+    "pattern": "^[0-9]{4}-[0-9]{2}$",
+    "type": "string"
+   },
+   "minItems": 20,
+   "type": "array"
+  },
+  "definition": {
+   "type": "string"
+  },
+  "mean_curve": {
+   "additionalProperties": true,
+   "properties": {
+    "n_cohorts": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "offsets": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "retention": {
+     "items": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "offsets",
+    "retention",
+    "n_cohorts"
+   ],
+   "type": "object"
+  },
+  "min_cohort_size": {
+   "type": "integer"
+  },
+  "notes": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1,
+   "type": "array"
+  },
+  "offsets": {
+   "items": {
+    "type": "integer"
+   },
+   "minItems": 12,
+   "type": "array"
+  },
+  "orders_per_active": {
+   "items": {
+    "items": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "type": "array"
+   },
+   "type": "array"
+  },
+  "retention": {
+   "items": {
+    "items": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "type": "array"
+   },
+   "type": "array"
+  },
+  "revenue_retention": {
+   "items": {
+    "items": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "type": "array"
+   },
+   "type": "array"
+  },
+  "right_censoring": {
+   "type": "string"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "sizes": {
+   "items": {
+    "type": "integer"
+   },
+   "type": "array"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "definition",
+  "min_cohort_size",
+  "cohort_months",
+  "sizes",
+  "offsets",
+  "retention",
+  "revenue_retention",
+  "orders_per_active",
+  "mean_curve",
+  "notes",
+  "right_censoring"
+ ],
+ "title": "cohorts",
+ "type": "object"
+}

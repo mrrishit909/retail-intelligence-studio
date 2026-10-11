@@ -1,0 +1,150 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "assumptions": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "basis": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "label": {
+      "type": "string"
+     },
+     "range": {
+      "items": {
+       "type": "number"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+     },
+     "unit": {
+      "type": "string"
+     },
+     "value": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "id",
+     "label",
+     "value",
+     "unit",
+     "basis",
+     "range"
+    ],
+    "type": "object"
+   },
+   "minItems": 4,
+   "type": "array"
+  },
+  "disclaimer": {
+   "type": "string"
+  },
+  "formula": {
+   "additionalProperties": true,
+   "properties": {
+    "critical_fractile": {
+     "type": "string"
+    },
+    "empirical": {
+     "type": "string"
+    },
+    "normal": {
+     "type": "string"
+    },
+    "profit": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "critical_fractile",
+    "normal",
+    "empirical",
+    "profit"
+   ],
+   "type": "object"
+  },
+  "items": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "forecast_next_week": {
+      "type": "number"
+     },
+     "id": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string"
+     },
+     "label": {
+      "type": "string"
+     },
+     "mean_weekly_units": {
+      "type": "number"
+     },
+     "price_gbp": {
+      "type": "number"
+     },
+     "sd_weekly_units": {
+      "type": "number"
+     },
+     "weekly_units_sample": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "weeks": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "id",
+     "label",
+     "kind",
+     "price_gbp",
+     "mean_weekly_units",
+     "sd_weekly_units",
+     "forecast_next_week",
+     "weekly_units_sample",
+     "weeks"
+    ],
+    "type": "object"
+   },
+   "minItems": 10,
+   "type": "array"
+  },
+  "labelled": {
+   "const": "SIMULATED"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "labelled",
+  "assumptions",
+  "formula",
+  "items",
+  "disclaimer"
+ ],
+ "title": "newsvendor_params",
+ "type": "object"
+}

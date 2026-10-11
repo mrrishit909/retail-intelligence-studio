@@ -1,0 +1,219 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "basket": {
+   "additionalProperties": true,
+   "properties": {
+    "invoice_value_quantiles": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "lines_per_invoice_quantiles": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "quantiles": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "lines_per_invoice_quantiles",
+    "invoice_value_quantiles",
+    "quantiles"
+   ],
+   "type": "object"
+  },
+  "countries": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "country": {
+      "type": "string"
+     },
+     "customers": {
+      "type": "integer"
+     },
+     "invoices": {
+      "type": "integer"
+     },
+     "net_gbp": {
+      "type": "number"
+     },
+     "share": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "country",
+     "net_gbp",
+     "share",
+     "invoices",
+     "customers"
+    ],
+    "type": "object"
+   },
+   "minItems": 5,
+   "type": "array"
+  },
+  "country_other": {
+   "additionalProperties": true,
+   "properties": {
+    "countries": {
+     "type": "integer"
+    },
+    "net_gbp": {
+     "type": "number"
+    },
+    "share": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "countries",
+    "net_gbp",
+    "share"
+   ],
+   "type": "object"
+  },
+  "months": {
+   "items": {
+    "pattern": "^[0-9]{4}-[0-9]{2}$",
+    "type": "string"
+   },
+   "minItems": 24,
+   "type": "array"
+  },
+  "rhythm": {
+   "additionalProperties": true,
+   "properties": {
+    "hour": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "lines": {
+     "items": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "type": "array"
+    },
+    "sales_gbp": {
+     "items": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "type": "array"
+    },
+    "weekday": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 7,
+     "minItems": 7,
+     "type": "array"
+    }
+   },
+   "required": [
+    "weekday",
+    "hour",
+    "sales_gbp",
+    "lines"
+   ],
+   "type": "object"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "series": {
+   "additionalProperties": true,
+   "properties": {
+    "active_customers": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "guest_revenue_share": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "invoices": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "nonproduct_net_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "product_net_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "refunds_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "sales_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "sales_gbp",
+    "refunds_gbp",
+    "product_net_gbp",
+    "nonproduct_net_gbp",
+    "invoices",
+    "active_customers",
+    "guest_revenue_share"
+   ],
+   "type": "object"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "months",
+  "series",
+  "countries",
+  "country_other",
+  "rhythm",
+  "basket"
+ ],
+ "title": "overview",
+ "type": "object"
+}

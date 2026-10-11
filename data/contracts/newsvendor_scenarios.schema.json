@@ -1,0 +1,166 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "grid": {
+   "additionalProperties": true,
+   "properties": {
+    "cost_ratio": {
+     "items": {
+      "type": "number"
+     },
+     "minItems": 3,
+     "type": "array"
+    },
+    "salvage_ratio": {
+     "items": {
+      "type": "number"
+     },
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "cost_ratio",
+    "salvage_ratio"
+   ],
+   "type": "object"
+  },
+  "policy_check": {
+   "additionalProperties": true,
+   "properties": {
+    "caveat": {
+     "type": "string"
+    },
+    "description": {
+     "type": "string"
+    },
+    "items": {
+     "type": "integer"
+    },
+    "per_item": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "item": {
+        "type": "string"
+       },
+       "profit_mean_order": {
+        "type": "number"
+       },
+       "profit_newsvendor": {
+        "type": "number"
+       },
+       "profit_snaive_order": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "item",
+       "profit_newsvendor",
+       "profit_mean_order",
+       "profit_snaive_order"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "profit_mean_order": {
+     "type": "number"
+    },
+    "profit_newsvendor": {
+     "type": "number"
+    },
+    "uplift_pct": {
+     "type": "number"
+    },
+    "weeks_evaluated": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "description",
+    "items",
+    "weeks_evaluated",
+    "profit_newsvendor",
+    "profit_mean_order",
+    "uplift_pct",
+    "per_item",
+    "caveat"
+   ],
+   "type": "object"
+  },
+  "scenarios": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "cost_ratio": {
+      "type": "number"
+     },
+     "critical_fractile": {
+      "type": "number"
+     },
+     "item": {
+      "type": "string"
+     },
+     "mean_order_profit": {
+      "type": "number"
+     },
+     "profit_empirical": {
+      "type": "number"
+     },
+     "profit_normal": {
+      "type": "number"
+     },
+     "q_empirical": {
+      "type": "number"
+     },
+     "q_normal": {
+      "type": "number"
+     },
+     "salvage_ratio": {
+      "type": "number"
+     },
+     "service_level": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "item",
+     "cost_ratio",
+     "salvage_ratio",
+     "critical_fractile",
+     "q_normal",
+     "q_empirical",
+     "profit_normal",
+     "profit_empirical",
+     "service_level",
+     "mean_order_profit"
+    ],
+    "type": "object"
+   },
+   "minItems": 50,
+   "type": "array"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "grid",
+  "scenarios",
+  "policy_check"
+ ],
+ "title": "newsvendor_scenarios",
+ "type": "object"
+}

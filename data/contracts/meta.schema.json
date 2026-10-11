@@ -1,0 +1,168 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "artifact_bytes": {
+   "type": "object"
+  },
+  "artifact_tags": {
+   "type": "object"
+  },
+  "assumptions": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1,
+   "type": "array"
+  },
+  "currency": {
+   "type": "string"
+  },
+  "disclaimers": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1,
+   "type": "array"
+  },
+  "engine": {
+   "additionalProperties": true,
+   "properties": {
+    "dbt_version": {
+     "type": "string"
+    },
+    "duckdb_version": {
+     "type": "string"
+    },
+    "python": {
+     "type": "string"
+    },
+    "seed": {
+     "type": "integer"
+    },
+    "star_schema": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "star_schema",
+    "dbt_version",
+    "duckdb_version",
+    "python",
+    "seed"
+   ],
+   "type": "object"
+  },
+  "no_demographics": {
+   "type": "string"
+  },
+  "pipeline_version": {
+   "type": "string"
+  },
+  "retrieved_at": {
+   "type": "string"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "source": {
+   "additionalProperties": true,
+   "properties": {
+    "attribution": {
+     "type": "string"
+    },
+    "dataset": {
+     "type": "string"
+    },
+    "doi": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "licence": {
+     "type": "string"
+    },
+    "licence_url": {
+     "type": "string"
+    },
+    "publisher": {
+     "type": "string"
+    },
+    "role": {
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "publisher",
+    "dataset",
+    "url",
+    "doi",
+    "licence",
+    "licence_url",
+    "attribution",
+    "role"
+   ],
+   "type": "object"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  },
+  "window": {
+   "additionalProperties": true,
+   "properties": {
+    "first_ts": {
+     "type": "string"
+    },
+    "first_week": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "last_complete_week": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "last_ts": {
+     "type": "string"
+    },
+    "weeks_complete": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "first_ts",
+    "last_ts",
+    "first_week",
+    "last_complete_week",
+    "weeks_complete"
+   ],
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "pipeline_version",
+  "retrieved_at",
+  "source",
+  "window",
+  "engine",
+  "currency",
+  "assumptions",
+  "disclaimers",
+  "no_demographics",
+  "artifact_tags",
+  "artifact_bytes"
+ ],
+ "title": "meta",
+ "type": "object"
+}

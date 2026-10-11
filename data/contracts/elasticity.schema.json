@@ -1,0 +1,200 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "decision": {
+   "additionalProperties": true,
+   "properties": {
+    "criteria": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "observed": {
+        "type": "number"
+       },
+       "pass": {
+        "type": "boolean"
+       },
+       "text": {
+        "type": "string"
+       },
+       "threshold": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "id",
+       "text",
+       "threshold",
+       "observed",
+       "pass"
+      ],
+      "type": "object"
+     },
+     "minItems": 3,
+     "type": "array"
+    },
+    "estimable": {
+     "type": "boolean"
+    },
+    "rule": {
+     "type": "string"
+    },
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "estimable",
+    "text",
+    "rule",
+    "criteria"
+   ],
+   "type": "object"
+  },
+  "estimates": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "evidence": {
+   "additionalProperties": true,
+   "properties": {
+    "distribution": {
+     "additionalProperties": true,
+     "properties": {
+      "distinct_prices_quantiles": {
+       "items": {
+        "type": "number"
+       },
+       "type": "array"
+      },
+      "price_cv_quantiles": {
+       "items": {
+        "type": "number"
+       },
+       "type": "array"
+      },
+      "quantile_levels": {
+       "items": {
+        "type": "number"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "distinct_prices_quantiles",
+      "price_cv_quantiles",
+      "quantile_levels"
+     ],
+     "type": "object"
+    },
+    "price_rows": {
+     "type": "integer"
+    },
+    "price_tiers_note": {
+     "type": "string"
+    },
+    "skus_considered": {
+     "type": "integer"
+    },
+    "skus_qualifying": {
+     "type": "integer"
+    },
+    "table": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "description": {
+        "type": "string"
+       },
+       "distinct_prices": {
+        "type": "integer"
+       },
+       "modal_price_gbp": {
+        "type": "number"
+       },
+       "modal_price_share": {
+        "type": "number"
+       },
+       "price_cv": {
+        "type": "number"
+       },
+       "price_regimes": {
+        "type": "integer"
+       },
+       "sku": {
+        "type": "string"
+       },
+       "units": {
+        "type": "integer"
+       },
+       "weeks_off_modal": {
+        "type": "integer"
+       },
+       "weeks_sold": {
+        "type": "integer"
+       }
+      },
+      "required": [
+       "sku",
+       "description",
+       "weeks_sold",
+       "distinct_prices",
+       "modal_price_gbp",
+       "modal_price_share",
+       "price_cv",
+       "weeks_off_modal",
+       "price_regimes",
+       "units"
+      ],
+      "type": "object"
+     },
+     "minItems": 20,
+     "type": "array"
+    }
+   },
+   "required": [
+    "skus_considered",
+    "skus_qualifying",
+    "price_rows",
+    "table",
+    "distribution",
+    "price_tiers_note"
+   ],
+   "type": "object"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  },
+  "what_would_be_needed": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 2,
+   "type": "array"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "decision",
+  "evidence",
+  "estimates",
+  "what_would_be_needed"
+ ],
+ "title": "elasticity",
+ "type": "object"
+}

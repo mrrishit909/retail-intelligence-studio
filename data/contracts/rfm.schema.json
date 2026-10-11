@@ -1,0 +1,290 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "bins": {
+   "additionalProperties": true,
+   "properties": {
+    "frequency_edges": {
+     "items": {
+      "type": "number"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "type": "array"
+    },
+    "monetary_gbp_edges": {
+     "items": {
+      "type": "number"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "type": "array"
+    },
+    "recency_days_edges": {
+     "items": {
+      "type": "number"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "type": "array"
+    }
+   },
+   "required": [
+    "recency_days_edges",
+    "frequency_edges",
+    "monetary_gbp_edges"
+   ],
+   "type": "object"
+  },
+  "country_names": {
+   "items": {
+    "type": "string"
+   },
+   "type": "array"
+  },
+  "customers": {
+   "additionalProperties": true,
+   "properties": {
+    "country": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "f": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "frequency": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "key": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "m": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "monetary_gbp": {
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "r": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "recency_days": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "segment": {
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "key",
+    "recency_days",
+    "frequency",
+    "monetary_gbp",
+    "r",
+    "f",
+    "m",
+    "segment",
+    "country"
+   ],
+   "type": "object"
+  },
+  "definition": {
+   "additionalProperties": true,
+   "properties": {
+    "frequency": {
+     "type": "string"
+    },
+    "monetary": {
+     "type": "string"
+    },
+    "recency": {
+     "type": "string"
+    },
+    "scoring": {
+     "type": "string"
+    },
+    "ties": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "recency",
+    "frequency",
+    "monetary",
+    "scoring",
+    "ties"
+   ],
+   "type": "object"
+  },
+  "grid": {
+   "additionalProperties": true,
+   "properties": {
+    "r_by_f_customers": {
+     "items": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "maxItems": 5,
+     "minItems": 5,
+     "type": "array"
+    },
+    "r_by_f_revenue_gbp": {
+     "items": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "maxItems": 5,
+     "minItems": 5,
+     "type": "array"
+    }
+   },
+   "required": [
+    "r_by_f_customers",
+    "r_by_f_revenue_gbp"
+   ],
+   "type": "object"
+  },
+  "included": {
+   "additionalProperties": true,
+   "properties": {
+    "customers": {
+     "type": "integer"
+    },
+    "customers_with_only_refunds": {
+     "type": "integer"
+    },
+    "excluded_guest_line_share": {
+     "type": "number"
+    },
+    "excluded_guest_revenue_share": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "customers",
+    "excluded_guest_line_share",
+    "excluded_guest_revenue_share",
+    "customers_with_only_refunds"
+   ],
+   "type": "object"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "segment_names": {
+   "items": {
+    "type": "string"
+   },
+   "type": "array"
+  },
+  "segments": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "action_note": {
+      "type": "string"
+     },
+     "avg_frequency": {
+      "type": "number"
+     },
+     "avg_monetary_gbp": {
+      "type": "number"
+     },
+     "avg_recency_days": {
+      "type": "number"
+     },
+     "customer_share": {
+      "type": "number"
+     },
+     "customers": {
+      "type": "integer"
+     },
+     "revenue_gbp": {
+      "type": "number"
+     },
+     "revenue_share": {
+      "type": "number"
+     },
+     "rule": {
+      "type": "string"
+     },
+     "segment": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "segment",
+     "rule",
+     "customers",
+     "customer_share",
+     "revenue_gbp",
+     "revenue_share",
+     "avg_recency_days",
+     "avg_frequency",
+     "avg_monetary_gbp",
+     "action_note"
+    ],
+    "type": "object"
+   },
+   "minItems": 6,
+   "type": "array"
+  },
+  "snapshot_date": {
+   "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+   "type": "string"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "snapshot_date",
+  "definition",
+  "bins",
+  "included",
+  "segments",
+  "grid",
+  "customers",
+  "segment_names",
+  "country_names"
+ ],
+ "title": "rfm",
+ "type": "object"
+}

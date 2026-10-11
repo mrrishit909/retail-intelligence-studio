@@ -1,0 +1,163 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "concentration": {
+   "additionalProperties": true,
+   "properties": {
+    "skus_for_80pct_revenue": {
+     "type": "integer"
+    },
+    "skus_total": {
+     "type": "integer"
+    },
+    "top_100_share": {
+     "type": "number"
+    },
+    "top_10_share": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "top_10_share",
+    "top_100_share",
+    "skus_for_80pct_revenue",
+    "skus_total"
+   ],
+   "type": "object"
+  },
+  "families": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "customers": {
+      "type": "integer"
+     },
+     "family": {
+      "type": "string"
+     },
+     "keywords": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "revenue_gbp": {
+      "type": "number"
+     },
+     "share": {
+      "type": "number"
+     },
+     "skus": {
+      "type": "integer"
+     },
+     "units": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "family",
+     "keywords",
+     "skus",
+     "revenue_gbp",
+     "units",
+     "share",
+     "customers"
+    ],
+    "type": "object"
+   },
+   "minItems": 10,
+   "type": "array"
+  },
+  "family_coverage_revenue_share": {
+   "type": "number"
+  },
+  "family_coverage_sku_share": {
+   "type": "number"
+  },
+  "family_rule": {
+   "type": "string"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  },
+  "top_skus": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "customers": {
+      "type": "integer"
+     },
+     "description": {
+      "type": "string"
+     },
+     "family": {
+      "type": "string"
+     },
+     "first_week": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "type": "string"
+     },
+     "invoices": {
+      "type": "integer"
+     },
+     "last_week": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "type": "string"
+     },
+     "median_price_gbp": {
+      "type": "number"
+     },
+     "refund_units": {
+      "type": "integer"
+     },
+     "revenue_gbp": {
+      "type": "number"
+     },
+     "sku": {
+      "type": "string"
+     },
+     "units": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "sku",
+     "description",
+     "family",
+     "revenue_gbp",
+     "units",
+     "customers",
+     "invoices",
+     "median_price_gbp",
+     "first_week",
+     "last_week",
+     "refund_units"
+    ],
+    "type": "object"
+   },
+   "minItems": 100,
+   "type": "array"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "family_rule",
+  "family_coverage_revenue_share",
+  "family_coverage_sku_share",
+  "families",
+  "top_skus",
+  "concentration"
+ ],
+ "title": "products",
+ "type": "object"
+}

@@ -1,0 +1,76 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "checks": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "actual": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "expected": {
+      "type": "string"
+     },
+     "group": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "pass": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "group",
+     "description",
+     "expected",
+     "actual",
+     "pass"
+    ],
+    "type": "object"
+   },
+   "minItems": 20,
+   "type": "array"
+  },
+  "failed": {
+   "type": "integer"
+  },
+  "limitations_observed": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 3,
+   "type": "array"
+  },
+  "passed": {
+   "type": "integer"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "checks",
+  "passed",
+  "failed",
+  "limitations_observed"
+ ],
+ "title": "validation",
+ "type": "object"
+}

@@ -1,0 +1,160 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "forecast_weeks": {
+   "items": {
+    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+    "type": "string"
+   },
+   "minItems": 1,
+   "type": "array"
+  },
+  "horizon_weeks": {
+   "type": "integer"
+  },
+  "interval": {
+   "additionalProperties": true,
+   "properties": {
+    "level": {
+     "type": "number"
+    },
+    "method": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "level",
+    "method"
+   ],
+   "type": "object"
+  },
+  "model": {
+   "type": "string"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "series": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "family": {
+      "type": "string"
+     },
+     "forecast": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "hi": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "history_units": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "family",
+       "sku"
+      ]
+     },
+     "label": {
+      "type": "string"
+     },
+     "lo": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "skill_vs_snaive_pct": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "snaive_wape_pct": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "total_units": {
+      "type": "integer"
+     },
+     "wape_pct": {
+      "type": [
+       "number",
+       "null"
+      ]
+     }
+    },
+    "required": [
+     "id",
+     "kind",
+     "label",
+     "family",
+     "history_units",
+     "forecast",
+     "lo",
+     "hi",
+     "total_units",
+     "skill_vs_snaive_pct",
+     "wape_pct",
+     "snaive_wape_pct"
+    ],
+    "type": "object"
+   },
+   "minItems": 20,
+   "type": "array"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  },
+  "unit": {
+   "type": "string"
+  },
+  "week_start": {
+   "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+   "type": "string"
+  },
+  "weeks": {
+   "items": {
+    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+    "type": "string"
+   },
+   "minItems": 90,
+   "type": "array"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "unit",
+  "week_start",
+  "weeks",
+  "horizon_weeks",
+  "forecast_weeks",
+  "model",
+  "interval",
+  "series"
+ ],
+ "title": "forecast",
+ "type": "object"
+}

@@ -1,0 +1,134 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "note": {
+   "type": "string"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  },
+  "tolerance_rel": {
+   "type": "number"
+  },
+  "vectors": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "case": {
+      "type": "string"
+     },
+     "expected": {
+      "additionalProperties": true,
+      "properties": {
+       "critical_fractile": {
+        "type": "number"
+       },
+       "expected_leftover": {
+        "type": "number"
+       },
+       "expected_profit": {
+        "type": "number"
+       },
+       "expected_sales": {
+        "type": "number"
+       },
+       "expected_shortage": {
+        "type": "number"
+       },
+       "q_star": {
+        "type": "number"
+       },
+       "service_level": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "critical_fractile",
+       "q_star",
+       "expected_profit",
+       "expected_sales",
+       "expected_leftover",
+       "expected_shortage",
+       "service_level"
+      ],
+      "type": "object"
+     },
+     "inputs": {
+      "additionalProperties": true,
+      "properties": {
+       "cost": {
+        "type": "number"
+       },
+       "mu": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "price": {
+        "type": "number"
+       },
+       "salvage": {
+        "type": "number"
+       },
+       "samples": {
+        "items": {
+         "type": "number"
+        },
+        "type": [
+         "array",
+         "null"
+        ]
+       },
+       "sigma": {
+        "type": [
+         "number",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "price",
+       "cost",
+       "salvage"
+      ],
+      "type": "object"
+     },
+     "model": {
+      "enum": [
+       "normal",
+       "empirical"
+      ]
+     }
+    },
+    "required": [
+     "case",
+     "model",
+     "inputs",
+     "expected"
+    ],
+    "type": "object"
+   },
+   "minItems": 20,
+   "type": "array"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "tolerance_rel",
+  "note",
+  "vectors"
+ ],
+ "title": "newsvendor_vectors",
+ "type": "object"
+}

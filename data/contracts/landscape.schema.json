@@ -1,0 +1,58 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "families": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 10,
+   "type": "array"
+  },
+  "note": {
+   "type": "string"
+  },
+  "revenue_gbp": {
+   "items": {
+    "items": {
+     "type": "number"
+    },
+    "type": "array"
+   },
+   "type": "array"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  },
+  "unit": {
+   "type": "string"
+  },
+  "weeks": {
+   "items": {
+    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+    "type": "string"
+   },
+   "minItems": 90,
+   "type": "array"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "weeks",
+  "families",
+  "revenue_gbp",
+  "unit",
+  "note"
+ ],
+ "title": "landscape",
+ "type": "object"
+}

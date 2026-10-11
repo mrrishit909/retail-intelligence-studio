@@ -1,0 +1,262 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "by_origin": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "mae": {
+      "type": "object"
+     },
+     "origin": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "type": "string"
+     }
+    },
+    "required": [
+     "origin",
+     "mae"
+    ],
+    "type": "object"
+   },
+   "minItems": 10,
+   "type": "array"
+  },
+  "by_series": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string"
+     },
+     "models": {
+      "type": "object"
+     }
+    },
+    "required": [
+     "id",
+     "kind",
+     "models"
+    ],
+    "type": "object"
+   },
+   "minItems": 20,
+   "type": "array"
+  },
+  "design": {
+   "additionalProperties": true,
+   "properties": {
+    "baseline": {
+     "type": "string"
+    },
+    "first_origin_week": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "horizons": {
+     "items": {
+      "type": "integer"
+     },
+     "minItems": 1,
+     "type": "array"
+    },
+    "last_origin_week": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+     "type": "string"
+    },
+    "metrics": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "min_train_weeks": {
+     "type": "integer"
+    },
+    "origins": {
+     "type": "integer"
+    },
+    "scheme": {
+     "type": "string"
+    },
+    "series": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "scheme",
+    "first_origin_week",
+    "last_origin_week",
+    "origins",
+    "horizons",
+    "min_train_weeks",
+    "series",
+    "baseline",
+    "metrics"
+   ],
+   "type": "object"
+  },
+  "interval_coverage": {
+   "additionalProperties": true,
+   "properties": {
+    "empirical": {
+     "type": "number"
+    },
+    "n": {
+     "type": "integer"
+    },
+    "nominal": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "nominal",
+    "empirical",
+    "n"
+   ],
+   "type": "object"
+  },
+  "models": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "description"
+    ],
+    "type": "object"
+   },
+   "minItems": 3,
+   "type": "array"
+  },
+  "pooled": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "bias_pct": {
+      "type": "number"
+     },
+     "horizon": {
+      "type": "integer"
+     },
+     "mae": {
+      "type": "number"
+     },
+     "mase": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "model": {
+      "type": "string"
+     },
+     "n": {
+      "type": "integer"
+     },
+     "scope": {
+      "enum": [
+       "all",
+       "family",
+       "sku"
+      ]
+     },
+     "skill_vs_snaive_pct": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "wape_pct": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "model",
+     "horizon",
+     "scope",
+     "mae",
+     "wape_pct",
+     "mase",
+     "bias_pct",
+     "skill_vs_snaive_pct",
+     "n"
+    ],
+    "type": "object"
+   },
+   "minItems": 10,
+   "type": "array"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  },
+  "verdict": {
+   "type": "string"
+  },
+  "win_rate": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "model": {
+      "type": "string"
+     },
+     "scope": {
+      "type": "string"
+     },
+     "series": {
+      "type": "integer"
+     },
+     "series_beating_snaive": {
+      "type": "integer"
+     },
+     "share": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "model",
+     "scope",
+     "series_beating_snaive",
+     "series",
+     "share"
+    ],
+    "type": "object"
+   },
+   "minItems": 2,
+   "type": "array"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "design",
+  "models",
+  "pooled",
+  "win_rate",
+  "by_series",
+  "by_origin",
+  "interval_coverage",
+  "verdict"
+ ],
+ "title": "backtest",
+ "type": "object"
+}

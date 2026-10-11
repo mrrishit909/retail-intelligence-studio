@@ -1,0 +1,375 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": true,
+ "properties": {
+  "amount_ledger": {
+   "additionalProperties": true,
+   "properties": {
+    "excluded_amount_gbp": {
+     "type": "number"
+    },
+    "excluded_by_reason_gbp": {
+     "type": "object"
+    },
+    "identity": {
+     "type": "string"
+    },
+    "kept_amount_gbp": {
+     "type": "number"
+    },
+    "raw_amount_gbp": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "raw_amount_gbp",
+    "kept_amount_gbp",
+    "excluded_amount_gbp",
+    "excluded_by_reason_gbp",
+    "identity"
+   ],
+   "type": "object"
+  },
+  "analytics_scopes": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "analysis": {
+      "type": "string"
+     },
+     "rows_dropped_by_reason": {
+      "type": "object"
+     },
+     "rows_in": {
+      "type": "integer"
+     },
+     "rows_out": {
+      "type": "integer"
+     },
+     "rule": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "analysis",
+     "rule",
+     "rows_in",
+     "rows_out",
+     "rows_dropped_by_reason"
+    ],
+    "type": "object"
+   },
+   "minItems": 5,
+   "type": "array"
+  },
+  "classes": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "amount_gbp": {
+      "type": "number"
+     },
+     "class": {
+      "type": "string"
+     },
+     "rows": {
+      "type": "integer"
+     },
+     "treatment": {
+      "type": "string"
+     },
+     "units": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "class",
+     "rows",
+     "amount_gbp",
+     "units",
+     "treatment"
+    ],
+    "type": "object"
+   },
+   "minItems": 5,
+   "type": "array"
+  },
+  "guest": {
+   "additionalProperties": true,
+   "properties": {
+    "amount_gbp": {
+     "type": "number"
+    },
+    "amount_share": {
+     "type": "number"
+    },
+    "note": {
+     "type": "string"
+    },
+    "row_share": {
+     "type": "number"
+    },
+    "rows": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "rows",
+    "row_share",
+    "amount_gbp",
+    "amount_share",
+    "note"
+   ],
+   "type": "object"
+  },
+  "identities": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "abs_diff": {
+      "type": "number"
+     },
+     "description": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "lhs": {
+      "type": "number"
+     },
+     "pass": {
+      "type": "boolean"
+     },
+     "rhs": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "id",
+     "description",
+     "lhs",
+     "rhs",
+     "abs_diff",
+     "pass"
+    ],
+    "type": "object"
+   },
+   "minItems": 6,
+   "type": "array"
+  },
+  "monthly": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "amount_gbp": {
+      "type": "number"
+     },
+     "month": {
+      "pattern": "^[0-9]{4}-[0-9]{2}$",
+      "type": "string"
+     }
+    },
+    "required": [
+     "month",
+     "amount_gbp"
+    ],
+    "type": "object"
+   },
+   "minItems": 24,
+   "type": "array"
+  },
+  "raw_files": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "bytes": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "sha256": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "bytes",
+     "sha256"
+    ],
+    "type": "object"
+   },
+   "minItems": 2,
+   "type": "array"
+  },
+  "refunds": {
+   "additionalProperties": true,
+   "properties": {
+    "invoices": {
+     "type": "integer"
+    },
+    "lines": {
+     "type": "integer"
+    },
+    "matched_lines": {
+     "type": "integer"
+    },
+    "matched_qty": {
+     "type": "integer"
+    },
+    "matching_rule": {
+     "type": "string"
+    },
+    "over_refund_lines": {
+     "type": "integer"
+    },
+    "unmatched_no_customer_lines": {
+     "type": "integer"
+    },
+    "unmatched_no_prior_sale_lines": {
+     "type": "integer"
+    },
+    "unmatched_qty": {
+     "type": "integer"
+    },
+    "value_gbp": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "lines",
+    "invoices",
+    "value_gbp",
+    "matched_lines",
+    "matched_qty",
+    "unmatched_qty",
+    "unmatched_no_customer_lines",
+    "unmatched_no_prior_sale_lines",
+    "matching_rule",
+    "over_refund_lines"
+   ],
+   "type": "object"
+  },
+  "retrieved_at": {
+   "type": "string"
+  },
+  "row_ledger": {
+   "additionalProperties": true,
+   "properties": {
+    "excluded": {
+     "type": "integer"
+    },
+    "excluded_by_reason": {
+     "type": "object"
+    },
+    "identity": {
+     "type": "string"
+    },
+    "kept": {
+     "type": "integer"
+    },
+    "raw_rows": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "raw_rows",
+    "kept",
+    "excluded",
+    "excluded_by_reason",
+    "identity"
+   ],
+   "type": "object"
+  },
+  "schema_version": {
+   "const": "v1"
+  },
+  "sheets": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "first_ts": {
+      "type": "string"
+     },
+     "last_ts": {
+      "type": "string"
+     },
+     "rows": {
+      "type": "integer"
+     },
+     "sheet": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "sheet",
+     "rows",
+     "first_ts",
+     "last_ts"
+    ],
+    "type": "object"
+   },
+   "maxItems": 2,
+   "minItems": 2,
+   "type": "array"
+  },
+  "stockcode_classes": {
+   "items": {
+    "additionalProperties": true,
+    "properties": {
+     "amount_gbp": {
+      "type": "number"
+     },
+     "class": {
+      "type": "string"
+     },
+     "codes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "rows": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "class",
+     "codes",
+     "rows",
+     "amount_gbp"
+    ],
+    "type": "object"
+   },
+   "minItems": 3,
+   "type": "array"
+  },
+  "tags": {
+   "additionalProperties": {
+    "pattern": "^(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC)(/(OBSERVED|DERIVED|PREDICTED|SIMULATED|SYNTHETIC))*$",
+    "type": "string"
+   },
+   "minProperties": 1,
+   "type": "object"
+  }
+ },
+ "required": [
+  "schema_version",
+  "tags",
+  "raw_files",
+  "retrieved_at",
+  "sheets",
+  "row_ledger",
+  "amount_ledger",
+  "classes",
+  "analytics_scopes",
+  "guest",
+  "refunds",
+  "stockcode_classes",
+  "identities",
+  "monthly"
+ ],
+ "title": "reconciliation",
+ "type": "object"
+}
