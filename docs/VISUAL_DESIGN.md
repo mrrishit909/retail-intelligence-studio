@@ -50,7 +50,11 @@ These are inputs to the design. The design does not choose them.
   1. "Rotating cohort rings, where retention shows as arcs shrinking outward": rings of arcs and rotation are P01's; concentric rings are P08's planned form. **Replaced** (section 2, "Departures").
   2. "A radial basket network": radial structure is P04's and P10's, chords are P01's. **Replaced.**
   3. The cross-project review: avoid "the frame-filling radial disc with a lower-left headline" (P04 and P05 both use it). P09's S00 headline is **top-left over the dim side of the anchor set**, the luminous form is **centre-right and made of two discs**, and the bottom-left holds only one chip.
-- **Data: contracts are committed, artifacts are not yet.** I checked `git log` in this repo on 2026-10-11: the head is `cd2b1fb` "Contracts: problem, data sources, data contracts and JSON Schemas for 17 artifacts". `site/public/data/` does not exist yet. Every binding in section 6 names a field in `data/contracts/*.schema.json` or a numbered data request (DR-n). **No number in this document is bound to my own computation.**
+- **Data: contracts at `cd2b1fb`, artifacts at `27f17e2`.** The contracts were committed first; during this task the data engine published all 17 artifacts (`27f17e2` "Data engine: ...", `60da691` "Build status: data passed"). I re-read them before committing this document. What they settle:
+  - `facts.basket_count` 39,516 (equals the CD fixture); `revenue_sales_gbp` 19,643,299.89 and `revenue_refunds_gbp` -716,425.97 (equal the fixture).
+  - `baskets`: min support 0.005 (198 baskets), min confidence 0.4, max length 3; `rules_total` 4,458 of which **76 are published**; the top-lift rule (150x) is a 3-item rule flagged `variant_of_same_product` (herb markers). **The CD hero pair (the jumbo bags, 1,428 baskets) is in neither the published rules nor the top edges** (the top edge has 1,114), so DR-1 is required, not optional.
+  - `elasticity.decision.estimable` is false: "price varies by buyer and order size, not over time". S07 answer 6 ships its not-estimable state.
+  - `facts.guest_line_share` 22.8%, `guest_revenue_share` 13.6%; `cohort_m12_retention_median` 17.2%; `forecast_win_rate` 94.5% (best model `mean4`); `clv_total_error_pct` -1.4%. Every binding in section 6 names a field in `data/contracts/*.schema.json` or a numbered data request (DR-n). **No number in this document is bound to my own computation.**
 - **The CD design fixture** (`design/sketches/cd_fixture.json`). So the sketches would be drawn from real data, not invented shapes, I read the raw workbook once (read only, in my scratchpad, never written to the repo) and computed a few aggregates with the contract's rules approximated: the overlap rows of sheet 1 dropped (dates on or after 2010-12-01), exact duplicates dropped, product stock codes by the contract's regex, sale lines with `Quantity > 0` and `Price > 0`, and the basket = the invoice. **Every number below marked "CD fixture" is my computation from the raw file on 2026-10-11, for sketches and copy drafts only.** The build binds to the artifacts; if they differ, the artifacts win and the copy follows.
   - Rows after the two exclusions: 1,033,036. Sale lines: £19,643,300. Refund lines (product codes): -£716,426. Guest share of sale revenue: 13.1%.
   - Baskets (invoices with at least one product sale line): **39,516**.
@@ -442,7 +446,7 @@ There are no spinners and no artificial delays.
 |---|---|---|---|---|---|
 | 1 | `#161616` | "A million lines, every one counted." | The row ledger as a falling count, each line the previous minus its stated drop: `{{raw_rows}} RAW ROWS` → `−{{overlap_duplicate}} SHEET OVERLAP (DEC 2010 IN BOTH SHEETS)` → `−{{exact_duplicate}} EXACT DUPLICATES` → `{{kept}} KEPT`, then the four line classes with rows and £: `SALE`, `REFUND`, `STOCK ADJUSTMENT`, `NON-PRODUCT`. A `✓` per passing identity from `reconciliation.identities` | `reconciliation.row_ledger`, `.classes`, `.identities` | OBSERVED |
 | 2 | `#161616` | "Refunds are their own set." | **A small Common Ground pair inside the card** (the only pair inside a card): anchor = product units sold (`classes[sale].units`), partner = units refunded (`refunds.matched_qty + refunds.unmatched_qty`), overlap = `refunds.matched_qty`. The partner's lone crescent is labelled `REFUNDED, NO SALE ON RECORD` (unmatched no prior sale, plus no customer: DR-8 splits them). Under it: `£{{refund_value}} REFUNDED · {{refund_value_share_of_sales}} OF SALES · MATCHED LIFO WITHIN CUSTOMER AND SKU` | `reconciliation.refunds`, `facts.refund_*`, DR-8 | OBSERVED |
-| 3 | `#161616` | "One sale in eight has no name." | Two stacked mono bars are banned; instead the line `{{guest_line_share}} OF LINES · {{guest_revenue_share}} OF REVENUE HAVE NO CUSTOMER ID`, and the rule list: `IN REVENUE: YES · IN BASKETS: YES · IN RFM, COHORTS, CLV: NO` | `reconciliation.guest`, `facts.guest_*` | OBSERVED |
+| 3 | `#161616` | "A fifth of the lines have no name." | Two stacked mono bars are banned; instead the line `{{guest_line_share}} OF LINES · {{guest_revenue_share}} OF REVENUE HAVE NO CUSTOMER ID`, and the rule list: `IN REVENUE: YES · IN BASKETS: YES · IN RFM, COHORTS, CLV: NO` | `reconciliation.guest`, `facts.guest_*` | OBSERVED |
 | 4 | `#192CE4` fill, white text | "No ages. No genders. No personas." | `meta.no_demographics` verbatim, uppercased; then `meta.source.attribution`, `DOI {{doi}}` (link), `CC BY 4.0 · DERIVED AGGREGATES, NOT THE ORIGINAL FILE` | `meta.no_demographics`, `meta.source` | OBSERVED |
 
 - **Footer** of card 1: `PIPELINE {{pipeline_version}} · DBT {{dbt_version}} · DUCKDB {{duckdb_version}}`.
@@ -466,7 +470,7 @@ There are no spinners and no artificial delays.
   - Each step: the old pair dims to the ghost; the new pair's discs light at their sizes **at the chance position**, then the partner is **pulled** to its real overlap (MOTION_SYSTEM 5.4). The ghost stays at the chance position at 6%.
   - Multi-item antecedents (`max_len` > 2): the anchor is "baskets holding all of {{antecedent}}" with its size `support / confidence × baskets` (derived exactly from the rule's own numbers; Vitest checks it against `nodes` for single items).
 - **Data:** `baskets.{rules, nodes, params}`, DR-2.
-- **Insight.** Lift is the distance chance had to travel. The strongest rules are near-twins (two colours of the same cup), whose overlap nearly swallows the smaller set; the most common pairs are bags and cases bought for the same occasion.
+- **Insight.** Lift is the distance chance had to travel. The highest-lift rules are variants of one product (three herb markers, 150x chance; flagged `variant_of_same_product` and shown at most once, labelled `VARIANTS OF ONE PRODUCT`); the most common pairs are bags and cases bought for the same occasion.
 - **Tags.** `baskets.tags` (DERIVED; counts OBSERVED); `baskets.caveat` verbatim, uppercased, always visible.
 - **Interactions** (interaction 2): RULE stepper (◀ ▶), ORDER `BY LIFT | BY BASKETS`, ACROSS FAMILIES toggle (filters to `same_family = false`), a disc click (interaction 9).
 - **Transition to S03b.** p 0.92-1: the pair crossfades out (350ms) and the cohort pair lights on its own axis.
@@ -484,7 +488,7 @@ There are no spinners and no artificial delays.
   - UNIT `CUSTOMERS | REVENUE` switches to `revenue_retention` (anchor = the cohort's month-0 revenue; overlap = its month-m revenue; partner = all known-customer revenue that month, DR-3). The discs re-size; the axis holds.
   - `right_censoring` verbatim, uppercased, beside the strip.
 - **Data:** `cohorts.{cohort_months, offsets, sizes, retention, revenue_retention, mean_curve, right_censoring, definition, notes}`, DR-3.
-- **Insight.** About a third of a cohort is still buying a year later (`facts.cohort_m12_retention_median`), and every November the active set swells with customers from every cohort.
+- **Insight.** A median cohort keeps about one customer in six a year later (`facts.cohort_m12_retention_median` = 17.2% at `27f17e2`; the first cohort, December 2009, keeps 37.6%), and every November the active set swells with customers from every cohort.
 - **Tags.** DERIVED; `KNOWN CUSTOMERS ONLY · GUESTS ARE {{guest_revenue_share}} OF REVENUE`.
 - **Interactions** (interaction 3): COHORT (visitor-set), MONTH (scroll or ◀ ▶), UNIT.
 - **Transition to S04.** The cohort pair re-sizes into the RFM pair (both are customers; the camera holds).
@@ -752,7 +756,7 @@ Rules:
 - Kicker: `WHAT THE LEDGER HOLDS · WHAT IT DOESN'T · AND WHAT WE LEFT OUT`
 - Card 1: "A million lines, every one counted." / `EVERY ROW IS KEPT OR DROPPED FOR A STATED REASON. THE TOTALS RECONCILE TO THE PENNY.`
 - Card 2: "Refunds are their own set." / `A REFUND IS NEVER HIDDEN INSIDE A SALE. SOME REFUND A SALE FROM BEFORE THE DATA BEGINS.`
-- Card 3: "One sale in eight has no name." / `GUEST LINES COUNT FOR REVENUE AND BASKETS. THEY CANNOT COUNT AS CUSTOMERS.` (the "one in eight" is design copy that must match `facts.guest_line_share` within ±1 point or be replaced by the number; CD fixture revenue share 13.1%)
+- Card 3: "A fifth of the lines have no name." / `GUEST LINES COUNT FOR REVENUE AND BASKETS. THEY CANNOT COUNT AS CUSTOMERS.` (design copy checked against `facts.guest_line_share` = 22.8% at `27f17e2`; if a rerun moves it outside 18-25%, the title becomes the number)
 - Card 4: "No ages. No genders. No personas." / `meta.no_demographics`
 
 ### S03a
@@ -798,7 +802,7 @@ Rules:
 
 ## 6. Placeholder bindings and data requests
 
-**Contract state checked 2026-10-11:** repo head `cd2b1fb` ("Contracts: ..."), 17 schemas in `data/contracts/`, no artifacts published yet. EXISTS means the field is in a committed schema. DR means a data request.
+**Contract state checked 2026-10-11:** contracts at `cd2b1fb` ("Contracts: ..."), 17 schemas in `data/contracts/`; artifacts published at `27f17e2` and re-read before this commit. EXISTS means the field is in a committed schema. DR means a data request.
 
 ### 6.1 Bindings
 
@@ -823,7 +827,7 @@ Rules:
 | ID | Request | Why the design needs it | Size |
 |---|---|---|---|
 | DR-1 | **Hero pair in facts.** `facts.hero_pair_a`, `hero_pair_b` (SKU), `hero_pair_a_desc`, `hero_pair_b_desc`, `hero_pair_na`, `hero_pair_nb`, `hero_pair_nab` (basket counts), `hero_pair_chance` (`na × nb / basket_count`), `hero_pair_lift`. **Rule:** the 2-item pair of product SKUs with the most baskets in common (ties: higher lift, then SKU order), the anchor being the larger set. CD fixture expects 85099B / 22386, 4,013 / 2,245 / 1,428 of 39,516 | S00 and S08 on the LCP path without loading `baskets.json` | tiny |
-| DR-2 | **Rule steps.** `baskets.showcase`: an ordered list of 6 rule indices: the 3 highest-lift rules then the 3 highest-count rules, the hero pair excluded, no rule twice; plus the rule that produced it | S03a's steps are data-chosen, not designer-chosen | tiny |
+| DR-2 | **Rule steps.** `baskets.showcase`: an ordered list of 6 rule indices: the 3 highest-lift rules **with `variant_of_same_product` false** then the 3 highest-count rules, the hero pair excluded, no rule twice; plus the rule that produced it. Also add `variant_of_same_product` to `baskets.schema.json` (present in the artifact at `27f17e2`, absent from the schema), and publish the edge for the DR-1 hero pair so THE COUNTER can reach it | S03a's steps are data-chosen, not designer-chosen | tiny |
 | DR-3 | **Active set per month.** In `cohorts.json`: `active_customers[]` (known customers with at least one sale line in each `cohort_months` calendar month, same definition as cohort activity) and `active_revenue_gbp[]` (their net revenue that month), aligned to `cohort_months`. Also confirm `overview.series.active_customers` uses the same definition, or say how it differs | The partner disc of every cohort pair (S03b) | 2 x 25 numbers |
 | DR-4 | **RFM grids for every pair.** `rfm.grid.r_by_m_customers`, `r_by_m_revenue_gbp`, `f_by_m_customers`, `f_by_m_revenue_gbp` (5 x 5 each), same scoring as `r_by_f` | S04 PAIR control and THE COUNTER | 100 numbers |
 | DR-5 | **Backtest area totals.** Per `backtest.pooled` row: `actual_total`, `forecast_total`, `over_total` (Σ max(f − a, 0)), `under_total` (Σ max(a − f, 0)); and the exact definition of `bias_pct` in `backtest.design` | S06 forecast pair areas must be exact, not recovered from rounded percentages | about 4 numbers per pooled row |
