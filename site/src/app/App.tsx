@@ -10,6 +10,19 @@ import { PairLayer } from "./PairLayer";
 import { OpeningLayer } from "./OpeningLayer";
 import { heroSpec } from "./specs";
 import { setPair } from "./pairView";
+import { S02Ledger } from "../scenes/S02Ledger";
+import { S03Together } from "../scenes/S03Together";
+import { S03bBack } from "../scenes/S03bBack";
+import { S04Matters } from "../scenes/S04Matters";
+import { S05Stock } from "../scenes/S05Stock";
+import { S06Sells } from "../scenes/S06Sells";
+import { S07Evidence } from "../scenes/S07Evidence";
+import { Counter } from "../scenes/Counter";
+import { S08Closing } from "../scenes/S08Closing";
+
+const SCENE_COMPONENTS: Record<string, (p: { def: SceneDef }) => React.ReactNode> = {
+  ledger: S02Ledger, together: S03Together, back: S03bBack, matters: S04Matters, stock: S05Stock, sells: S06Sells, evidence: S07Evidence, counter: Counter,
+};
 
 function Placeholder({ s }: { s: SceneDef }) {
   return (
@@ -46,7 +59,11 @@ export function App() {
         onSkip={intro.skip}
         onReplay={intro.replay}
       />
-      {SCENES.slice(1).map((s) => <Placeholder key={s.id} s={s} />)}
+      {SCENES.slice(1).map((s) => {
+        if (s.id === "closing") return <S08Closing key={s.id} def={s} onReplay={intro.replay} />;
+        const C = SCENE_COMPONENTS[s.id];
+        return C ? <C key={s.id} def={s} /> : <Placeholder key={s.id} s={s} />;
+      })}
     </>
   );
 }

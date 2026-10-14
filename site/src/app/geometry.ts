@@ -5,8 +5,8 @@ const REF = { D: [1440, 900], T: [768, 1024], M: [390, 844] } as const;
 const H: [number, number] = [1, 0], DG: [number, number] = [0.6, 0.8], CO: [number, number] = [0.55, 0.835];
 const G = {
   D: { G0: { chord: [1000, 450], R: 558, axis: H }, G1: { chord: [1100, 470], R: 300, axis: H }, G2: { chord: [1000, 470], R: 330, axis: H }, G5: { chord: [980, 500], R: 300, axis: H } },
-  T: { G0: { chord: [430, 620], R: 560, axis: DG }, G1: { chord: [384, 760], R: 260, axis: DG }, G2: { chord: [384, 650], R: 280, axis: DG }, G5: { chord: [384, 380], R: 240, axis: DG } },
-  M: { G0: { chord: [205, 480], R: 300, axis: DG }, G1: { chord: [195, 640], R: 170, axis: DG }, G2: { chord: [195, 470], R: 170, axis: DG }, G5: { chord: [195, 300], R: 150, axis: DG } },
+  T: { G0: { chord: [430, 620], R: 560, axis: DG }, G1: { chord: [384, 760], R: 260, axis: DG }, G2: { chord: [384, 340], R: 150, axis: DG }, G5: { chord: [384, 380], R: 240, axis: DG } },
+  M: { G0: { chord: [205, 480], R: 300, axis: DG }, G1: { chord: [195, 640], R: 170, axis: DG }, G2: { chord: [195, 300], R: 100, axis: DG }, G5: { chord: [195, 300], R: 150, axis: DG } },
 } as const;
 export const classOf = (w: number): Cls => (w < 768 ? "M" : w < 1024 ? "T" : "D");
 export function camera(name: "G0" | "G1" | "G2" | "G5", w: number, h: number, axisKind: "h" | "diag" | "cohort" = "h"): Cam {
