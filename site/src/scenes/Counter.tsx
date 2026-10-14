@@ -44,9 +44,17 @@ export function Counter({ def }: { def: SceneDef }) {
   const builtAll = useMemo((): { spec: PairSpec | null; note: string } => {
     let note = "";
     if (kind === "products" && B) {
-      const na = B.nodes.find((n) => n.sku === skuA), nb = B.nodes.find((n) => n.sku === skuB);
+      const look = (sku: string) => {
+        const n = B.nodes.find((x) => x.sku === sku);
+        if (n) return { baskets: n.baskets, description: n.description };
+        if (sku === B.hero.a) return { baskets: B.hero.na, description: B.hero.a_desc };
+        if (sku === B.hero.b) return { baskets: B.hero.nb, description: B.hero.b_desc };
+        return null;
+      };
+      const na = look(skuA), nb = look(skuB);
       if (!na || !nb || skuA === skuB) return { spec: null, note };
-      const e = B.edges.find((x) => (x.a === skuA && x.b === skuB) || (x.a === skuB && x.b === skuA));
+      const isHero = (skuA === B.hero.a && skuB === B.hero.b) || (skuA === B.hero.b && skuB === B.hero.a);
+      const e = isHero ? { count: B.hero.nab } : B.edges.find((x) => (x.a === skuA && x.b === skuB) || (x.a === skuB && x.b === skuA));
       if (!e) note = `FEWER THAN ${B.params.support_count_min} BASKETS TOGETHER, OR NOT PUBLISHED`;
       const spec: PairSpec = { id: `ctr:p:${skuA}:${skuB}`, unit: "BASKETS", sizeA: na.baskets, sizeB: nb.baskets, shared: e ? e.count : 0, labelA: na.description, labelB: nb.description, chance: e ? (na.baskets * nb.baskets) / B.params.baskets : null, role: "observed", interval: null, hatch: false, refSize: Math.max(na.baskets, nb.baskets), axis: "h" };
       return { spec, note };

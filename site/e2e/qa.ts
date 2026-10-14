@@ -10,8 +10,11 @@ export const WALK: [string, number][] = [
 
 export async function openSite(page: Page, query = "?quality=high") {
   await page.goto(query);
-  await page.keyboard.press("Escape");
-  await page.waitForFunction(() => ((window as any).__rs && !(window as any).__rs.introStats().playing && (window as any).__rs.debug().frames > 1) || document.documentElement.dataset.motion === "off");
+  await page.waitForFunction(() => (window as any).__rs && (window as any).__rs.core() === "ready");
+  await page.waitForTimeout(300);
+  await page.keyboard.press("Escape"); // completes the intro in 350 ms (or does nothing when it is not playing)
+  await page.waitForFunction(() => !(window as any).__rs.introStats().playing || document.documentElement.dataset.motion === "off");
+  await page.waitForTimeout(500);
 }
 export async function goScene(page: Page, id: string, p: number) {
   await page.evaluate(([i, q]) => (window as any).__rs.jumpTo(i, q), [id, p] as const);

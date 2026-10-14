@@ -30,7 +30,7 @@
 
   /* semantic (data honesty tags + states) */
   --tag-observed: #ffffff;
-  --tag-derived: var(--accent-light-blue);
+  --tag-derived: #8fd8f5;
   --tag-predicted: #8fa2ff;   /* lighter than --accent-blue so it passes 4.5:1 on black */
   --tag-simulated: var(--accent-orange);
   --tag-synthetic: #b48cff;   /* lighter than --accent-purple for contrast */

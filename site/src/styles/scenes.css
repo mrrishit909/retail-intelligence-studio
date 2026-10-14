@@ -163,3 +163,16 @@ html[data-motion="off"] .ex { transition: none; }
 html[data-motion="off"] .sheet { animation: none; }
 .slot-wrap { grid-area: disc; position: relative; min-height: 0; }
 .slot-wrap > .disc-slot { position: absolute; inset: 0; }
+
+.ex__a .chip, .ex__a .chip * { color: #000 !important; }
+.ex__a .chip { background: rgb(0 0 0 / 0.12); }
+.note--rose .chip, .note--dark .chip { color: #8fd8f5; }
+@media (max-width: 1023px) {
+  .scene-col .ctl-row { background: rgb(0 0 0 / 0.94); padding: 8px 10px; margin: 0 -10px; width: fit-content; max-width: calc(100vw - 24px); }
+}
+@media (max-height: 800px) and (min-width: 1024px) {
+  .s02-kicker { display: none; }
+  .s01-title { font-size: 40px; } .s01-statement { top: 215px; }
+  .s01-cards .note__body { font-size: 12px; } .note--dark, .note--rose { padding: 8px 14px; } .s01-cards { gap: 8px; }
+  .hero-title { font-size: 60px; }
+}
