@@ -1,0 +1,52 @@
+/* Retail Intelligence Studio scenes. Text never sits on the light: statements use a scrim or the text column. */
+.pair-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.track { position: relative; z-index: 1; }
+.scene-pattern .stage-content { position: relative; }
+.hero-scrim { position: absolute; left: 0; top: 60px; width: 760px; height: 360px; z-index: 1; pointer-events: none; background: linear-gradient(to right, rgb(0 0 0 / 0.88), rgb(0 0 0 / 0)); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 62%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 62%, transparent); }
+.wordmark { position: absolute; z-index: 3; left: 96px; top: 24px; margin: 0; font: 400 13px / 1 var(--font-mono); letter-spacing: 0.04em; }
+.hero-title { position: absolute; z-index: 3; left: 96px; top: 100px; margin: 0; max-width: 560px; transform-origin: 0 0; font: 400 72px / 1.0 var(--font-display); letter-spacing: -0.01em; }
+.intro-corner { position: absolute; z-index: 3; right: 32px; top: 24px; text-align: right; font: 400 13px / 1.3 var(--font-mono); letter-spacing: 0.04em; max-width: 52vw; }
+.intro-corner__a { margin: 0; } .intro-corner__b { margin: 4px 0 0; color: rgb(255 255 255 / 0.6); }
+.s00-state { position: absolute; z-index: 3; left: 96px; bottom: 200px; }
+.s00-readout { position: absolute; z-index: 3; left: 96px; top: 340px; margin: 0; max-width: 520px; font: 400 13px / 1.4 var(--font-mono); letter-spacing: 0.04em; background: rgb(0 0 0 / 0.72); padding: 8px 10px; }
+.set-label { position: absolute; z-index: 3; bottom: 150px; display: flex; flex-direction: column; gap: 2px; font: 400 13px / 1.3 var(--font-mono); letter-spacing: 0.04em; background: rgb(0 0 0 / 0.78); padding: 8px 10px; max-width: 300px; }
+.set-label .dim { color: rgb(255 255 255 / 0.7); }
+.set-label--a { left: 96px; } .set-label--b { right: 48px; text-align: right; }
+.s00-chip { position: absolute; z-index: 3; left: 96px; bottom: 98px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.doi { font: 400 12px / 1 var(--font-mono); letter-spacing: 0.04em; color: #fff; text-decoration: underline; }
+.s01-statement { position: absolute; z-index: 3; left: 96px; top: 250px; max-width: 600px; pointer-events: none; opacity: 0; }
+.s01-title { margin: 0; font: 400 56px / 1.04 var(--font-display); }
+.s01-cards { position: absolute; z-index: 3; left: 96px; bottom: 100px; width: 410px; display: grid; gap: 12px; opacity: 0; }
+.note--dark, .note--rose { border-radius: 8px; padding: 14px 20px; }
+.note--dark { background: #161616; }
+.note--rose { background: #292929; box-shadow: inset 4px 0 0 #FF2F7A; }
+.note__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.note .note__head { margin: 0; color: rgb(255 255 255 / 0.74); }
+.note .note__body { margin: 0; font: 400 14px / 1.35 var(--font-mono); letter-spacing: 0.02em; }
+.note__tag { flex: none; width: fit-content; }
+.chip__detail { white-space: normal; }
+@media (max-width: 1023px) {
+  .hero-title { left: 48px; top: 96px; font-size: 56px; max-width: 560px; }
+  .hero-scrim { width: 100%; height: 320px; top: 0; background: linear-gradient(to bottom, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0)); -webkit-mask-image: none; mask-image: none; }
+  .wordmark { left: 48px; }
+  .s00-readout { left: 48px; top: 330px; }
+  .set-label--a { left: 48px; bottom: 150px; } .set-label--b { right: 24px; bottom: 150px; }
+  .s00-chip { left: 48px; bottom: 100px; }
+  .s01-statement { left: 48px; top: 190px; } .s01-title { font-size: 44px; }
+  .s01-cards { left: 48px; top: 330px; bottom: auto; width: calc(100vw - 96px); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  .s01-compact { display: none; }
+}
+@media (max-width: 767px) {
+  .hero-title { left: 16px; top: 84px; font-size: 36px; max-width: calc(100vw - 32px); }
+  .wordmark { left: 16px; top: 14px; font-size: 11px; }
+  .hero-scrim { height: 230px; -webkit-mask-image: none; mask-image: none; }
+  .intro-corner { left: 16px; right: 16px; top: 34px; max-width: none; text-align: left; font-size: 10px; } .intro-corner__b { display: none; }
+  .s00-readout { left: 16px; top: 200px; max-width: calc(100vw - 32px); font-size: 11px; }
+  .set-label { font-size: 11px; max-width: 46vw; padding: 6px 8px; }
+  .set-label--a { left: 16px; bottom: 200px; } .set-label--b { right: 16px; bottom: 200px; }
+  .s00-chip { left: 16px; bottom: 112px; max-width: calc(100vw - 32px); } .doi { display: none; }
+  .s01-statement { left: 16px; top: 140px; max-width: calc(100vw - 32px); } .s01-title { font-size: 30px; }
+  .s01-cards { left: 16px; top: 232px; width: calc(100vw - 32px); grid-template-columns: 1fr; gap: 6px; }
+  .note--dark, .note--rose { padding: 10px 12px; } .note .note__body { font-size: 11.5px; } .note__top { margin-bottom: 4px; }
+}
+html[data-motion="off"] .hero-title { top: 100px; }
