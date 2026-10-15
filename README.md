@@ -27,3 +27,7 @@ npx playwright test --workers 1
 ```
 
 Honest limits: one UK gift-ware wholesaler over 24 months, mostly trade buyers; no demographics; price elasticity is not estimable from this ledger (the site says so and shows why); the newsvendor costs are assumptions (SIMULATED).
+
+## Code licence status
+
+No code licence has been selected for this repository. It is public so the work can be viewed; public visibility does not itself grant any right to copy, modify, redistribute or reuse the code, text or design. All rights are reserved by the author until a licence file is added. Third-party data keeps its own licence and attribution terms, listed in `docs/DATA_SOURCES.md`.
